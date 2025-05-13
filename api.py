@@ -1,10 +1,12 @@
 import datetime
+import json
 from flask import Flask, jsonify, request
 from flasgger import Swagger
 import requests
 from bs4 import BeautifulSoup
 import jwt
 from functools import wraps
+from web_scrapers.vitibrasil_scraper import VitibrasilScraper
 
 JWT_SECRET = "MEUSEGREDOAQUI"
 JWT_ALGORITHM = "HS256"
@@ -24,7 +26,7 @@ def extrair_tabela(url):
         response = requests.get(url)
         response.raise_for_status()   # Isso lança erro se status não for 200
     except requests.exceptions.RequestException as e:
-        return jsonify({"error": "Item not found"}), 500
+        return jsonify({"error": e}), 500
 
     soup = BeautifulSoup(response.text, 'html.parser')
     tabelas = soup.find_all('table')
@@ -226,10 +228,29 @@ def home():
         "endpoints": ["/producao", "/processamento", "/exportacao"]
     })
 
+
+@app.route('/comercializacao', methods=['GET'])
+def comercializacao():
+  # 
+  try:
+    scraper = VitibrasilScraper()
+    dados_comercializacao = scraper.scrape_comercializacao()
+    dados_json = json.dumps(dados_comercializacao, indent=4, ensure_ascii=False)
+    return jsonify({
+        "dados": dados_json
+    })
+  except Exception as e:
+    return jsonify({ 
+        "error": str(e)
+    }), 500
+    
+
+#- /importacao
+
 @app.route('/hello-world', methods=['GET'])
 @token_required
 def hello_world():
-    return 'OK'
+  return 'OK'
 
 if __name__ == '__main__':
     app.run(debug=True)

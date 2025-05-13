@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 import jwt
 from functools import wraps
 from web_scrapers.vitibrasil_scraper import VitibrasilScraper
+import pandas as pd
 
 JWT_SECRET = "MEUSEGREDOAQUI"
 JWT_ALGORITHM = "HS256"
@@ -106,9 +107,7 @@ def producao():
             tabela:
               type: array
               items:
-                type: array
-                items:
-                  type: string
+                type: object
       404:
         description: Nenhuma tabela encontrada na página.
         schema:
@@ -126,8 +125,13 @@ def producao():
               type: string
               example: "Erro ao acessar a URL: ..."
     """
-    url = 'https://www.embrapa.br/uva-e-vinho/producao'
-    return extrair_tabela(url)
+    scraper = VitibrasilScraper()
+    dados = scraper.scrape_producao()
+
+    if dados is None:
+        return jsonify({'erro': 'Nenhuma tabela encontrada ou erro de acesso'}), 404
+
+    return jsonify({'tabela': dados}), 200
 
 @app.route('/processamento', methods=['GET'])
 def processamento():

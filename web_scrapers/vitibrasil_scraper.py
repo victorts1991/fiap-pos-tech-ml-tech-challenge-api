@@ -1,48 +1,77 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
-import requests
-import json
 
 class VitibrasilScraper:
 
     url_comercializacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04'
+    url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
 
     def __init__(self):
-        pass  
+        # Configura o Chrome em modo headless (sem abrir janela)
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--window-size=1920x1080')
+        chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.78 Safari/537.36')
+
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
     def scrape_comercializacao(self):
-        """Faz o scraping da aba de Comercialização e extrai os dados da tabela."""
+        return self._scrape_tabela_com_categorias(self.url_comercializacao)
+
+    def scrape_producao(self):
+        return self._scrape_tabela_com_categorias(self.url_producao)
+
+    def _scrape_tabela_com_categorias(self, url):
         try:
-            response = requests.get(self.url_comercializacao)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.content, 'html.parser')
+            self.driver.get(url)
 
-            table = soup.find('table', class_='tb_base')
+            html = self.driver.page_source
+            soup = BeautifulSoup(html, 'html.parser')
+
+            # Encontrando a tabela certa
+            table = soup.find('table', class_=lambda c: c and 'tb_base' in c and 'tb_dados' in c)
             if not table:
-                print("Tabela 'tb_base' não encontrada na página.")
-                return None
+                print("Tabela com dados não encontrada.")
+                return []
 
-            headers = [th.text.strip() for th in table.thead.find_all('th')]
+            rows = table.find_all('tr')
             data = []
-            rows = table.tbody.find_all('tr')
+            current_categoria = None
 
-            current_item = None
             for row in rows:
-                cells = row.find_all('td', class_=['tb_item', 'tb_subitem'])
-                if len(cells) == 2:
-                    produto_cell = cells[0]
-                    quantidade_cell = cells[1]
+                cols = row.find_all('td')
+                if not cols or len(cols) < 2:
+                    continue
 
-                    produto = produto_cell.text.strip()
-                    quantidade = quantidade_cell.text.strip()
+                nome = cols[0].text.strip()
+                quantidade = cols[1].text.strip()
+                classes = cols[0].get('class', [])
 
-                    if 'tb_item' in produto_cell['class']:
-                        current_item = {'Produto': produto, 'Quantidade (L.)': quantidade, 'subitens': []}
-                        data.append(current_item)
-                    elif current_item and 'tb_subitem' in produto_cell['class']:
-                        current_item['subitens'].append({'Produto': produto, 'Quantidade (L.)': quantidade})
+                if 'tb_item' in classes:
+                    current_categoria = {
+                        'categoria': nome,
+                        'quantidade': quantidade,
+                        'subcategorias': []
+                    }
+                    data.append(current_categoria)
+                elif 'tb_subitem' in classes and current_categoria:
+                    current_categoria['subcategorias'].append({
+                        'subcategoria': nome,
+                        'quantidade': quantidade
+                    })
 
             return data
 
-        except requests.exceptions.RequestException as e:
-            print(f"Erro ao acessar {self.url_comercializacao}: {e}")
+        except Exception as e:
+            print(f"Erro durante scraping: {e}")
             return None
+
+    def __del__(self):
+        if self.driver:
+            self.driver.quit()

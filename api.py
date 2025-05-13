@@ -1,17 +1,22 @@
-from flask import Flask, jsonify
-from flask_httpauth import HTTPBasicAuth
+import datetime
+from flask import Flask, jsonify, request
 from flasgger import Swagger
-from flask_swagger_ui import get_swaggerui_blueprint
 import requests
 from bs4 import BeautifulSoup
+import jwt
+from functools import wraps
 
+JWT_SECRET = "MEUSEGREDOAQUI"
+JWT_ALGORITHM = "HS256"
+JWT_EXP_DELTA_SECONDS = 3600
+ 
 app = Flask(__name__)
 app.config['SWAGGER'] = {
     'title': 'My Flask API',
     'uiversion': 3
 }
 
-swagger = Swagger(app)
+swagger = Swagger(app) 
 
 #Função genérica para extrair tabela HTML
 def extrair_tabela(url):
@@ -36,6 +41,55 @@ def extrair_tabela(url):
 
     return jsonify({'tabela': dados})
 
+TEST_USERNAME = "admin"
+TEST_PASSWORD = "secret"
+
+def create_token(username):
+    payload = {
+        "username": username,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(seconds=JWT_EXP_DELTA_SECONDS)
+    }
+    token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    return token
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            try:
+                token = auth_header.split()[1] # Bearer <token>
+            except IndexError:
+                return jsonify({'error': 'Token de autorização inválido'}), 401
+
+        if not token:
+            return jsonify({'error': 'Token de autorização ausente'}), 401
+
+        try:
+            data = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            # Você pode adicionar lógica aqui para verificar se o usuário existe, etc.
+            # Se quiser passar o username para a função de rota:
+            # return f(current_user=data['username'], *args, **kwargs)
+            return f(*args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify({'error': 'Token expirado'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'error': 'Token inválido'}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json(force=True)
+    username = data.get("username")
+    password = data.get("password")
+    if username == TEST_USERNAME and password == TEST_PASSWORD:
+        token = create_token(username)
+        return jsonify({"token": token})
+    else:
+        return jsonify({"error": "Credenciais inválidas"}), 401
+    
 @app.route('/producao', methods=['GET'])
 def producao():
     """
@@ -171,6 +225,11 @@ def home():
         "mensagem": "API Embrapa Vitivinicultura",
         "endpoints": ["/producao", "/processamento", "/exportacao"]
     })
+
+@app.route('/hello-world', methods=['GET'])
+@token_required
+def hello_world():
+    return 'OK'
 
 if __name__ == '__main__':
     app.run(debug=True)

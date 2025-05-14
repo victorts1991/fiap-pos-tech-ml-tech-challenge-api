@@ -11,6 +11,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import pandas as pd
 import time
+import re  
 
 JWT_SECRET = "MEUSEGREDOAQUI"
 JWT_ALGORITHM = "HS256"
@@ -243,11 +244,10 @@ def exportacao():
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
 
-        # Extrai o ano do título
+        # Extrai o ano do título (ex: [2024])
         titulo = soup.find("p", string=lambda x: x and "[" in x and "]" in x)
         ano = None
         if titulo:
-            import re
             match = re.search(r"\[(\d{4})\]", titulo.get_text())
             if match:
                 ano = match.group(1)
@@ -279,8 +279,8 @@ def exportacao():
             quantidade = colunas[1].get_text(strip=True)
             valor = colunas[2].get_text(strip=True)
 
-            # Ignora linhas decorativas ou inválidas
-            if not pais or "vinhos" in pais.lower() or "suco" in pais.lower() or "Ano" in valor:
+            # 🔍 Filtro para ignorar linhas com dados vazios ou decorativos
+            if not pais or (quantidade == "-" and valor == "-"):
                 continue
 
             dados.append({
@@ -384,9 +384,8 @@ def comercializacao():
   try:
     scraper = VitibrasilScraper()
     dados_comercializacao = scraper.scrape_comercializacao()
-    dados_json = json.dumps(dados_comercializacao, indent=4, ensure_ascii=False)
     return jsonify({
-        "dados": dados_json
+        "dados": dados_comercializacao
     })
   except Exception as e:
     return jsonify({ 

@@ -154,8 +154,70 @@ def processamento():
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
+@app.route('/comercializacao', methods=['GET'])
+def comercializacao():
+  # 
+  try:
+    scraper = VitibrasilScraper()
+    dados_comercializacao = scraper.scrape_comercializacao()
+    return jsonify({
+        "dados": dados_comercializacao
+    })
+  except Exception as e:
+    return jsonify({ 
+        "error": str(e)
+    }), 500
+    
+@app.route('/importacao', methods=['GET'])
+def importacao():
+    """
+    Endpoint para extrair e formatar os dados da tabela de importação de derivados de uva.
+    """
+    url = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_05'
 
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
 
+    driver = webdriver.Chrome(options=chrome_options)
+
+    try:
+        driver.get(url)
+        time.sleep(3)
+
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+
+        tabelas = soup.find_all("table")
+        for tabela in tabelas:
+            linhas = tabela.find_all("tr")
+            if not linhas:
+                continue
+
+            cabecalho = [col.get_text(strip=True) for col in linhas[0].find_all(["th", "td"])]
+            if "Países" in cabecalho and "Quantidade (Kg)" in cabecalho and "Valor (US$)" in cabecalho:
+                dados = []
+                for linha in linhas[1:]:
+                    colunas_linha = linha.find_all("td")
+                    if len(colunas_linha) == 3:
+                        pais = colunas_linha[0].get_text(strip=True)
+                        quantidade = colunas_linha[1].get_text(strip=True)
+                        valor = colunas_linha[2].get_text(strip=True)
+                        dados.append({
+                            "pais": pais,
+                            "quantidade_kg": quantidade,
+                            "valor_usd": valor
+                        })
+
+                return jsonify({"importacoes": dados})
+
+        return jsonify({"erro": "Tabela não encontrada"}), 404
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+    finally:
+        driver.quit()
 
 @app.route('/exportacao', methods=['GET'])
 def exportacao():
@@ -231,58 +293,10 @@ def exportacao():
     finally:
         driver.quit()
 
-
-
-@app.route('/importacao', methods=['GET'])
-def importacao():
-    """
-    Endpoint para extrair e formatar os dados da tabela de importação de derivados de uva.
-    """
-    url = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_05'
-
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-
-    driver = webdriver.Chrome(options=chrome_options)
-
-    try:
-        driver.get(url)
-        time.sleep(3)
-
-        html = driver.page_source
-        soup = BeautifulSoup(html, 'html.parser')
-
-        tabelas = soup.find_all("table")
-        for tabela in tabelas:
-            linhas = tabela.find_all("tr")
-            if not linhas:
-                continue
-
-            cabecalho = [col.get_text(strip=True) for col in linhas[0].find_all(["th", "td"])]
-            if "Países" in cabecalho and "Quantidade (Kg)" in cabecalho and "Valor (US$)" in cabecalho:
-                dados = []
-                for linha in linhas[1:]:
-                    colunas_linha = linha.find_all("td")
-                    if len(colunas_linha) == 3:
-                        pais = colunas_linha[0].get_text(strip=True)
-                        quantidade = colunas_linha[1].get_text(strip=True)
-                        valor = colunas_linha[2].get_text(strip=True)
-                        dados.append({
-                            "pais": pais,
-                            "quantidade_kg": quantidade,
-                            "valor_usd": valor
-                        })
-
-                return jsonify({"importacoes": dados})
-
-        return jsonify({"erro": "Tabela não encontrada"}), 404
-
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
-
-    finally:
-        driver.quit()
+@app.route('/hello-world', methods=['GET'])
+@token_required
+def hello_world():
+  return 'OK'
 
 
 @app.route('/')
@@ -311,27 +325,7 @@ def home():
     })
 
 
-@app.route('/comercializacao', methods=['GET'])
-def comercializacao():
-  # 
-  try:
-    scraper = VitibrasilScraper()
-    dados_comercializacao = scraper.scrape_comercializacao()
-    return jsonify({
-        "dados": dados_comercializacao
-    })
-  except Exception as e:
-    return jsonify({ 
-        "error": str(e)
-    }), 500
-    
 
-#- /importacao
-
-@app.route('/hello-world', methods=['GET'])
-@token_required
-def hello_world():
-  return 'OK'
 
 if __name__ == '__main__':
     app.run(debug=True)

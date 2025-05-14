@@ -7,7 +7,10 @@ from bs4 import BeautifulSoup
 import jwt
 from functools import wraps
 from web_scrapers.vitibrasil_scraper import VitibrasilScraper
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import pandas as pd
+import time
 
 JWT_SECRET = "MEUSEGREDOAQUI"
 JWT_ALGORITHM = "HS256"
@@ -136,76 +139,218 @@ def producao():
 @app.route('/processamento', methods=['GET'])
 def processamento():
     """
-    Endpoint para extrair a tabela da página de processamento.
-    ---
-    responses:
-      200:
-        description: Dados da tabela de processamento.
-        schema:
-          type: object
-          properties:
-            tabela:
-              type: array
-              items:
-                type: array
-                items:
-                  type: string
-      404:
-        description: Nenhuma tabela encontrada na página.
-        schema:
-          type: object
-          properties:
-            erro:
-              type: string
-              example: "Nenhuma tabela encontrada"
-      500:
-        description: Erro ao acessar a URL.
-        schema:
-          type: object
-          properties:
-            erro:
-              type: string
-              example: "Erro ao acessar a URL: ..."
+    Endpoint para extrair e formatar os dados da tabela de processamento de uvas viníferas.
     """
-    url = 'https://www.embrapa.br/uva-e-vinho/processamento'
-    return extrair_tabela(url)
+    url = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_03'
+
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+
+    driver = webdriver.Chrome(options=chrome_options)
+
+    try:
+        driver.get(url)
+        time.sleep(3)
+
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # Extrai o ano
+        titulo = soup.find("p", string=lambda x: x and "Uvas viníferas processadas" in x)
+        ano = None
+        if titulo:
+            import re
+            match = re.search(r"\[(\d{4})\]", titulo.get_text())
+            if match:
+                ano = match.group(1)
+
+        tabelas = soup.find_all("table")
+        tabela_dados = None
+
+        for tabela in tabelas:
+            linhas = tabela.find_all("tr")
+            if not linhas:
+                continue
+
+            primeira_linha = linhas[0]
+            cabecalho = [col.get_text(strip=True) for col in primeira_linha.find_all(["td", "th"])]
+            if "Cultivar" in cabecalho and "Quantidade (Kg)" in cabecalho:
+                tabela_dados = tabela
+                break
+
+        if not tabela_dados:
+            return jsonify({"erro": "Tabela de dados não encontrada"}), 404
+
+        dados = []
+        tipo_atual = None
+
+        linhas = tabela_dados.find_all("tr")
+        for linha in linhas:
+            ths = linha.find_all("th")
+            tds = linha.find_all("td")
+
+            # Detecta novo tipo via <th>
+            if len(ths) == 1:
+                texto_th = ths[0].get_text(strip=True)
+                if texto_th.upper() not in ["CULTIVAR", "QUANTIDADE (KG)"]:
+                    tipo_atual = texto_th
+                continue
+
+            if len(tds) == 2:
+                col1 = tds[0].get_text(strip=True)
+                col2 = tds[1].get_text(strip=True)
+
+                # Detecta linha com tipo + total (e usa pra setar o tipo_atual)
+                if re.fullmatch(r"[A-Z\s]+", col1) and re.match(r"^[\d\.\,]+$", col2):
+                    tipo_atual = col1  # agora sim define antes dos dados!
+                    continue  # mas ignora essa linha
+
+                dados.append({
+                    "ano": ano,
+                    "tipo": tipo_atual,
+                    "cultivar": col1,
+                    "quantidade_kg": col2
+                })
+
+        return jsonify({"processamento": dados})
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+    finally:
+        driver.quit()
+
+
 
 @app.route('/exportacao', methods=['GET'])
 def exportacao():
     """
-    Endpoint para extrair a tabela da página de exportação.
-    ---
-    responses:
-      200:
-        description: Dados da tabela de exportação.
-        schema:
-          type: object
-          properties:
-            tabela:
-              type: array
-              items:
-                type: array
-                items:
-                  type: string
-      404:
-        description: Nenhuma tabela encontrada na página.
-        schema:
-          type: object
-          properties:
-            erro:
-              type: string
-              example: "Nenhuma tabela encontrada"
-      500:
-        description: Erro ao acessar a URL.
-        schema:
-          type: object
-          properties:
-            erro:
-              type: string
-              example: "Erro ao acessar a URL: ..."
+    Endpoint para extrair e formatar os dados da tabela de exportação de derivados de uva.
     """
-    url = 'https://www.embrapa.br/uva-e-vinho/exportacao'
-    return extrair_tabela(url)
+    url = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_06'
+
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+
+    driver = webdriver.Chrome(options=chrome_options)
+
+    try:
+        driver.get(url)
+        time.sleep(3)
+
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # Extrai o ano do título
+        titulo = soup.find("p", string=lambda x: x and "[" in x and "]" in x)
+        ano = None
+        if titulo:
+            import re
+            match = re.search(r"\[(\d{4})\]", titulo.get_text())
+            if match:
+                ano = match.group(1)
+
+        tabelas = soup.find_all("table")
+        tabela_dados = None
+
+        for tabela in tabelas:
+            linhas = tabela.find_all("tr")
+            if not linhas:
+                continue
+
+            cabecalho = [col.get_text(strip=True) for col in linhas[0].find_all(["td", "th"])]
+            if set(["Países", "Quantidade (Kg)", "Valor (US$)"]).issubset(set(cabecalho)):
+                tabela_dados = tabela
+                break
+
+        if not tabela_dados:
+            return jsonify({"erro": "Tabela de exportação não encontrada"}), 404
+
+        dados = []
+
+        for linha in tabela_dados.find_all("tr")[1:]:  # ignora cabeçalho
+            colunas = linha.find_all("td")
+            if len(colunas) != 3:
+                continue
+
+            pais = colunas[0].get_text(strip=True)
+            quantidade = colunas[1].get_text(strip=True)
+            valor = colunas[2].get_text(strip=True)
+
+            # Ignora linhas decorativas ou inválidas
+            if not pais or "vinhos" in pais.lower() or "suco" in pais.lower() or "Ano" in valor:
+                continue
+
+            dados.append({
+                "ano": ano,
+                "pais": pais,
+                "quantidade_kg": quantidade,
+                "valor_usd": valor
+            })
+
+        return jsonify({"exportacao": dados})
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+    finally:
+        driver.quit()
+
+
+
+@app.route('/importacao', methods=['GET'])
+def importacao():
+    """
+    Endpoint para extrair e formatar os dados da tabela de importação de derivados de uva.
+    """
+    url = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_05'
+
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+
+    driver = webdriver.Chrome(options=chrome_options)
+
+    try:
+        driver.get(url)
+        time.sleep(3)
+
+        html = driver.page_source
+        soup = BeautifulSoup(html, 'html.parser')
+
+        tabelas = soup.find_all("table")
+        for tabela in tabelas:
+            linhas = tabela.find_all("tr")
+            if not linhas:
+                continue
+
+            cabecalho = [col.get_text(strip=True) for col in linhas[0].find_all(["th", "td"])]
+            if "Países" in cabecalho and "Quantidade (Kg)" in cabecalho and "Valor (US$)" in cabecalho:
+                dados = []
+                for linha in linhas[1:]:
+                    colunas_linha = linha.find_all("td")
+                    if len(colunas_linha) == 3:
+                        pais = colunas_linha[0].get_text(strip=True)
+                        quantidade = colunas_linha[1].get_text(strip=True)
+                        valor = colunas_linha[2].get_text(strip=True)
+                        dados.append({
+                            "pais": pais,
+                            "quantidade_kg": quantidade,
+                            "valor_usd": valor
+                        })
+
+                return jsonify({"importacoes": dados})
+
+        return jsonify({"erro": "Tabela não encontrada"}), 404
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+    finally:
+        driver.quit()
+
 
 @app.route('/')
 def home():

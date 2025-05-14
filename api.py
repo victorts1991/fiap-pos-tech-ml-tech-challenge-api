@@ -142,85 +142,16 @@ def processamento():
     """
     Endpoint para extrair e formatar os dados da tabela de processamento de uvas viníferas.
     """
-    url = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_03'
-
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-
-    driver = webdriver.Chrome(options=chrome_options)
-
     try:
-        driver.get(url)
-        time.sleep(3)
-
-        html = driver.page_source
-        soup = BeautifulSoup(html, 'html.parser')
-
-        # Extrai o ano
-        titulo = soup.find("p", string=lambda x: x and "Uvas viníferas processadas" in x)
-        ano = None
-        if titulo:
-            import re
-            match = re.search(r"\[(\d{4})\]", titulo.get_text())
-            if match:
-                ano = match.group(1)
-
-        tabelas = soup.find_all("table")
-        tabela_dados = None
-
-        for tabela in tabelas:
-            linhas = tabela.find_all("tr")
-            if not linhas:
-                continue
-
-            primeira_linha = linhas[0]
-            cabecalho = [col.get_text(strip=True) for col in primeira_linha.find_all(["td", "th"])]
-            if "Cultivar" in cabecalho and "Quantidade (Kg)" in cabecalho:
-                tabela_dados = tabela
-                break
-
-        if not tabela_dados:
-            return jsonify({"erro": "Tabela de dados não encontrada"}), 404
-
-        dados = []
-        tipo_atual = None
-
-        linhas = tabela_dados.find_all("tr")
-        for linha in linhas:
-            ths = linha.find_all("th")
-            tds = linha.find_all("td")
-
-            # Detecta novo tipo via <th>
-            if len(ths) == 1:
-                texto_th = ths[0].get_text(strip=True)
-                if texto_th.upper() not in ["CULTIVAR", "QUANTIDADE (KG)"]:
-                    tipo_atual = texto_th
-                continue
-
-            if len(tds) == 2:
-                col1 = tds[0].get_text(strip=True)
-                col2 = tds[1].get_text(strip=True)
-
-                # Detecta linha com tipo + total (e usa pra setar o tipo_atual)
-                if re.fullmatch(r"[A-Z\s]+", col1) and re.match(r"^[\d\.\,]+$", col2):
-                    tipo_atual = col1  # agora sim define antes dos dados!
-                    continue  # mas ignora essa linha
-
-                dados.append({
-                    "ano": ano,
-                    "tipo": tipo_atual,
-                    "cultivar": col1,
-                    "quantidade_kg": col2
-                })
-
-        return jsonify({"processamento": dados})
-
+        scraper = VitibrasilScraper()
+        dados_processamento = scraper.scrape_processamento()
+        return jsonify({
+            "dados": dados_processamento
+        })
     except Exception as e:
-        return jsonify({"erro": str(e)}), 500
-
-    finally:
-        driver.quit()
+        return jsonify({ 
+            "error": str(e)
+        }), 500
 
 
 

@@ -9,6 +9,11 @@ class VitibrasilScraper:
     url_comercializacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04'
     url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
 
+    url_processamento_viniferas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03'
+    url_americanas_hibridas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03'
+    url_uvas_de_mesa = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03'
+    url_sem_classificacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03'
+
     def __init__(self):
         # Configura o Chrome em modo headless (sem abrir janela)
         chrome_options = Options()
@@ -26,6 +31,19 @@ class VitibrasilScraper:
 
     def scrape_producao(self):
         return self._scrape_tabela_com_categorias(self.url_producao)
+    
+    def scrape_processamento(self):
+        viniferas = self._scrape_tabela_com_categorias(self.url_processamento_viniferas)
+        americanas_hibridas = self._scrape_tabela_com_categorias(self.url_americanas_hibridas)
+        uvas_de_mesa = self._scrape_tabela_com_categorias(self.url_uvas_de_mesa)
+        sem_classificacao = self._scrape_tabela_com_categorias(self.url_sem_classificacao)
+
+        return {
+            "viniferas": viniferas,
+            "americanas_hibridas": americanas_hibridas,
+            "uvas_de_mesa": uvas_de_mesa,
+            "sem_classificacao": sem_classificacao
+        }
 
     def _scrape_tabela_com_categorias(self, url):
         try:

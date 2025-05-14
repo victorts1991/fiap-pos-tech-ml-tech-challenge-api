@@ -140,18 +140,20 @@ def producao():
 @app.route('/processamento', methods=['GET'])
 def processamento():
     """
-    Endpoint para extrair e formatar os dados da tabela de processamento de uvas viníferas.
+    Endpoint para extrair e formatar os dados das tabelas de processamento de uvas:
+    viníferas, americanas/híbridas, uvas de mesa e sem classificação.
     """
     try:
         scraper = VitibrasilScraper()
         dados_processamento = scraper.scrape_processamento()
+
         return jsonify({
-            "dados": dados_processamento
+            "processamento": dados_processamento
         })
+
     except Exception as e:
-        return jsonify({ 
-            "error": str(e)
-        }), 500
+        return jsonify({"erro": str(e)}), 500
+
 
 
 

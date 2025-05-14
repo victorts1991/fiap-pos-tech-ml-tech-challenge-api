@@ -3,6 +3,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
+import re
+import time
 
 class VitibrasilScraper:
 
@@ -15,80 +17,84 @@ class VitibrasilScraper:
     url_sem_classificacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03'
 
     def __init__(self):
-        # Configura o Chrome em modo headless (sem abrir janela)
         chrome_options = Options()
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument('--window-size=1920x1080')
-        chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.6367.78 Safari/537.36')
+        chrome_options.add_argument('--user-agent=Mozilla/5.0')
 
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
-    def scrape_comercializacao(self):
-        return self._scrape_tabela_com_categorias(self.url_comercializacao)
-
-    def scrape_producao(self):
-        return self._scrape_tabela_com_categorias(self.url_producao)
-    
     def scrape_processamento(self):
-        viniferas = self._scrape_tabela_com_categorias(self.url_processamento_viniferas)
-        americanas_hibridas = self._scrape_tabela_com_categorias(self.url_americanas_hibridas)
-        uvas_de_mesa = self._scrape_tabela_com_categorias(self.url_uvas_de_mesa)
-        sem_classificacao = self._scrape_tabela_com_categorias(self.url_sem_classificacao)
-
         return {
-            "viniferas": viniferas,
-            "americanas_hibridas": americanas_hibridas,
-            "uvas_de_mesa": uvas_de_mesa,
-            "sem_classificacao": sem_classificacao
+            "viniferas": self._scrape_tabela_com_categorias(self.url_processamento_viniferas),
+            "americanas_hibridas": self._scrape_tabela_com_categorias(self.url_americanas_hibridas),
+            "uvas_de_mesa": self._scrape_tabela_com_categorias(self.url_uvas_de_mesa),
+            "sem_classificacao": self._scrape_tabela_com_categorias(self.url_sem_classificacao, sem_classificacao=True)
         }
 
-    def _scrape_tabela_com_categorias(self, url):
+    def _scrape_tabela_com_categorias(self, url, sem_classificacao=False):
         try:
             self.driver.get(url)
-
+            time.sleep(3)
             html = self.driver.page_source
             soup = BeautifulSoup(html, 'html.parser')
 
-            # Encontrando a tabela certa
-            table = soup.find('table', class_=lambda c: c and 'tb_base' in c and 'tb_dados' in c)
-            if not table:
-                print("Tabela com dados não encontrada.")
+            titulo = soup.find("p", string=lambda x: x and "[" in x and "]" in x)
+            ano = None
+            if titulo:
+                match = re.search(r"\[(\d{4})\]", titulo.get_text())
+                if match:
+                    ano = match.group(1)
+
+            tabela = None
+            for t in soup.find_all("table"):
+                primeira_linha = t.find("tr")
+                if not primeira_linha:
+                    continue
+                cabecalho = [th.get_text(strip=True).upper() for th in primeira_linha.find_all(["th", "td"])]
+                if ("CULTIVAR" in cabecalho and "QUANTIDADE (KG)" in cabecalho) or ("SEM DEFINIÇÃO" in cabecalho and "QUANTIDADE (KG)" in cabecalho):
+                    tabela = t
+                    break
+
+            if not tabela:
                 return []
 
-            rows = table.find_all('tr')
-            data = []
-            current_categoria = None
+            dados = []
+            tipo_atual = None
 
-            for row in rows:
-                cols = row.find_all('td')
-                if not cols or len(cols) < 2:
+            for linha in tabela.find_all("tr"):
+                colunas = linha.find_all("td")
+
+                if len(colunas) == 1:
+                    texto = colunas[0].get_text(strip=True)
+                    if texto.upper() not in ["CULTIVAR", "QUANTIDADE (KG)", "TOTAL", "DOWNLOAD", "TOPO"]:
+                        tipo_atual = texto
                     continue
 
-                nome = cols[0].text.strip()
-                quantidade = cols[1].text.strip()
-                classes = cols[0].get('class', [])
+                if len(colunas) == 2:
+                    cultivar = colunas[0].get_text(strip=True)
+                    quantidade = colunas[1].get_text(strip=True)
 
-                if 'tb_item' in classes:
-                    current_categoria = {
-                        'categoria': nome,
-                        'quantidade': quantidade,
-                        'subcategorias': []
-                    }
-                    data.append(current_categoria)
-                elif 'tb_subitem' in classes and current_categoria:
-                    current_categoria['subcategorias'].append({
-                        'subcategoria': nome,
-                        'quantidade': quantidade
+                    if not cultivar or not quantidade:
+                        continue
+
+                    if cultivar.isupper() and quantidade.replace('.', '').replace('-', '').isdigit():
+                        tipo_atual = cultivar
+
+                    dados.append({
+                        "ano": ano,
+                        "cultivar": cultivar,
+                        "quantidade_kg": quantidade,
+                        "tipo": tipo_atual if not sem_classificacao else "SEM CLASSIFICACAO"
                     })
-
-            return data
+            return dados
 
         except Exception as e:
-            print(f"Erro durante scraping: {e}")
-            return None
+            print(f"Erro ao processar URL {url}: {e}")
+            return []
 
     def __del__(self):
         if self.driver:

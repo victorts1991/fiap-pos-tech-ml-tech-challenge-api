@@ -6,6 +6,10 @@ from bs4 import BeautifulSoup
 import re
 import time
 
+class ScrapingError(Exception):
+    """Exceção personalizada para erros de scraping."""
+    pass
+
 class VitibrasilScraper:
 
     url_comercializacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04'
@@ -27,74 +31,76 @@ class VitibrasilScraper:
 
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
-    def scrape_processamento(self):
-        return {
-            "viniferas": self._scrape_tabela_com_categorias(self.url_processamento_viniferas),
-            "americanas_hibridas": self._scrape_tabela_com_categorias(self.url_americanas_hibridas),
-            "uvas_de_mesa": self._scrape_tabela_com_categorias(self.url_uvas_de_mesa),
-            "sem_classificacao": self._scrape_tabela_com_categorias(self.url_sem_classificacao, sem_classificacao=True)
-        }
+    def scrape_processamento_viniferas(self, max_retries=3, retry_delay=5):
+        return self._scrape_tabela(self.url_processamento_viniferas, 'viniferas', max_retries, retry_delay)
 
-    def _scrape_tabela_com_categorias(self, url, sem_classificacao=False):
-        try:
-            self.driver.get(url)
-            time.sleep(3)
-            html = self.driver.page_source
-            soup = BeautifulSoup(html, 'html.parser')
+    def scrape_processamento_americanas_hibridas(self, max_retries=3, retry_delay=5):
+        return self._scrape_tabela(self.url_americanas_hibridas, 'americanas_hibridas', max_retries, retry_delay)
 
-            titulo = soup.find("p", string=lambda x: x and "[" in x and "]" in x)
-            ano = None
-            if titulo:
-                match = re.search(r"\[(\d{4})\]", titulo.get_text())
-                if match:
-                    ano = match.group(1)
+    def scrape_processamento_uvas_de_mesa(self, max_retries=3, retry_delay=5):
+        return self._scrape_tabela(self.url_uvas_de_mesa, 'uvas_de_mesa', max_retries, retry_delay)
 
-            tabela = None
-            for t in soup.find_all("table"):
-                primeira_linha = t.find("tr")
-                if not primeira_linha:
-                    continue
-                cabecalho = [th.get_text(strip=True).upper() for th in primeira_linha.find_all(["th", "td"])]
-                if ("CULTIVAR" in cabecalho and "QUANTIDADE (KG)" in cabecalho) or ("SEM DEFINIÇÃO" in cabecalho and "QUANTIDADE (KG)" in cabecalho):
-                    tabela = t
-                    break
+    def scrape_processamento_sem_classificacao(self, max_retries=3, retry_delay=5):
+        return self._scrape_tabela(self.url_sem_classificacao, 'sem_classificacao', max_retries, retry_delay)
 
-            if not tabela:
-                return []
+    def _scrape_tabela(self, url, categoria, max_retries=3, retry_delay=5):
+        for attempt in range(max_retries):
+            try:
+                self.driver.get(url)
+                time.sleep(3)
+                html = self.driver.page_source
+                soup = BeautifulSoup(html, 'html.parser')
 
-            dados = []
-            tipo_atual = None
+                titulo = soup.find("p", string=lambda x: x and "[" in x and "]" in x)
+                ano = None
+                if titulo:
+                    match = re.search(r"\[(\d{4})\]", titulo.get_text())
+                    if match:
+                        ano = match.group(1)
 
-            for linha in tabela.find_all("tr"):
-                colunas = linha.find_all("td")
-
-                if len(colunas) == 1:
-                    texto = colunas[0].get_text(strip=True)
-                    if texto.upper() not in ["CULTIVAR", "QUANTIDADE (KG)", "TOTAL", "DOWNLOAD", "TOPO"]:
-                        tipo_atual = texto
-                    continue
-
-                if len(colunas) == 2:
-                    cultivar = colunas[0].get_text(strip=True)
-                    quantidade = colunas[1].get_text(strip=True)
-
-                    if not cultivar or not quantidade:
+                tabela = None
+                for t in soup.find_all("table"):
+                    primeira_linha = t.find("tr")
+                    if not primeira_linha:
                         continue
+                    cabecalho_elementos = primeira_linha.find_all(["th", "td"])
+                    if cabecalho_elementos:
+                        cabecalho = [th.get_text(strip=True).upper() for th in cabecalho_elementos]
+                        if "CULTIVAR" in cabecalho or "SEM DEFINIÇÃO" in cabecalho:
+                            tabela = t
+                            break
 
-                    if cultivar.isupper() and quantidade.replace('.', '').replace('-', '').isdigit():
-                        tipo_atual = cultivar
+                if tabela:
+                    dados = []
+                    linhas = tabela.find_all("tr")[1:]  # Ignora a linha de cabeçalho
+                    cabecalho_tabela = [th.get_text(strip=True) for th in tabela.find("tr").find_all(["th", "td"])]
 
-                    dados.append({
-                        "ano": ano,
-                        "cultivar": cultivar,
-                        "quantidade_kg": quantidade,
-                        "tipo": tipo_atual if not sem_classificacao else "SEM CLASSIFICACAO"
-                    })
-            return dados
+                    for linha in linhas:
+                        celulas = linha.find_all("td")
+                        if len(celulas) == len(cabecalho_tabela):
+                            item = {"ano": ano, "categoria": categoria}
+                            has_data = False
+                            for i, coluna in enumerate(cabecalho_tabela):
+                                value = celulas[i].get_text(strip=True)
+                                item[coluna.lower().replace(' ', '_').replace('(', '').replace(')', '')] = value
+                                if value and value != '-':  # Considera valores não vazios ou traços como dados
+                                    has_data = True
+                            if has_data:
+                                dados.append(item)
 
-        except Exception as e:
-            print(f"Erro ao processar URL {url}: {e}")
-            return []
+                    if not dados and categoria != 'sem_classificacao':
+                        raise ScrapingError(f"A tabela para a categoria '{categoria}' foi encontrada, mas não contém dados significativos. Possível erro de carregamento.")
+
+                    return {"categoria": categoria, "dados": dados}
+                else:
+                    print(f"Tabela não encontrada na URL {url} na tentativa {attempt + 1}.")
+                    time.sleep(retry_delay)
+
+            except Exception as e:
+                print(f"Erro ao processar URL {url} na tentativa {attempt + 1}: {e}")
+                time.sleep(retry_delay)
+
+        raise ScrapingError(f"Falha ao encontrar a tabela após {max_retries} tentativas na URL: {url}")
 
     def __del__(self):
         if self.driver:

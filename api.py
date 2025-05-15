@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 import jwt
 from functools import wraps
-from web_scrapers.vitibrasil_scraper import VitibrasilScraper
+from web_scrapers.vitibrasil_scraper import VitibrasilScraper, ScrapingError
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import pandas as pd
@@ -47,6 +47,7 @@ def extrair_tabela(url):
             dados.append([col.text.strip() for col in colunas])
 
     return jsonify({'tabela': dados})
+
 
 TEST_USERNAME = "admin"
 TEST_PASSWORD = "secret"
@@ -97,6 +98,7 @@ def login():
     else:
         return jsonify({"error": "Credenciais inválidas"}), 401
     
+# ainda falta    
 @app.route('/producao', methods=['GET'])
 def producao():
     """
@@ -137,22 +139,42 @@ def producao():
 
     return jsonify({'tabela': dados}), 200
 
-@app.route('/processamento', methods=['GET'])
-def processamento():
+@app.route('/processamento/<categoria>', methods=['GET'])
+def processamento(categoria):
     """
-    Endpoint para extrair e formatar os dados das tabelas de processamento de uvas:
-    viníferas, americanas/híbridas, uvas de mesa e sem classificação.
+    Endpoint para extrair os dados de processamento por categoria.
     """
     try:
         scraper = VitibrasilScraper()
-        dados_processamento = scraper.scrape_processamento()
+        resultado_scraping = None
 
-        return jsonify({
-            "processamento": dados_processamento
-        })
+        if categoria == 'viniferas':
+            resultado_scraping = scraper.scrape_processamento_viniferas()
+        elif categoria == 'americanas_hibridas':
+            resultado_scraping = scraper.scrape_processamento_americanas_hibridas()
+        elif categoria == 'uvas_de_mesa':
+            resultado_scraping = scraper.scrape_processamento_uvas_de_mesa()
+        elif categoria == 'sem_classificacao':
+            resultado_scraping = scraper.scrape_processamento_sem_classificacao()
+        else:
+            return jsonify({"error": "Categoria inválida"}), 400
 
-    except Exception as e:
+        if resultado_scraping and resultado_scraping.get("dados"):
+            return jsonify(resultado_scraping)
+        elif resultado_scraping and not resultado_scraping.get("dados"):
+            return jsonify({"categoria": categoria, "dados": []}) # Retorna lista vazia se a tabela for encontrada, mas sem dados
+        else:
+            return jsonify({"erro": f"Não foi possível obter os dados de processamento para a categoria '{categoria}'"}), 500
+
+    except ScrapingError as e:
         return jsonify({"erro": str(e)}), 500
+    except Exception as e:
+        return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
+
+    except ScrapingError as e:
+        return jsonify({"erro": str(e)}), 500
+    except Exception as e:
+        return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
 
 @app.route('/comercializacao', methods=['GET'])
 def comercializacao():
@@ -323,8 +345,6 @@ def home():
         "mensagem": "API Embrapa Vitivinicultura",
         "endpoints": ["/producao", "/processamento", "/exportacao"]
     })
-
-
 
 
 if __name__ == '__main__':

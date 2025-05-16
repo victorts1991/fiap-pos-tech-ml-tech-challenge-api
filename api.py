@@ -102,42 +102,28 @@ def login():
 @app.route('/producao', methods=['GET'])
 def producao():
     """
-    Endpoint para extrair a tabela da página de produção.
-    ---
-    responses:
-      200:
-        description: Dados da tabela de produção.
-        schema:
-          type: object
-          properties:
-            tabela:
-              type: array
-              items:
-                type: object
-      404:
-        description: Nenhuma tabela encontrada na página.
-        schema:
-          type: object
-          properties:
-            erro:
-              type: string
-              example: "Nenhuma tabela encontrada"
-      500:
-        description: Erro ao acessar a URL.
-        schema:
-          type: object
-          properties:
-            erro:
-              type: string
-              example: "Erro ao acessar a URL: ..."
+    Endpoint para extrair os dados de processamento por categoria.
     """
-    scraper = VitibrasilScraper()
-    dados = scraper.scrape_producao()
+    try:
+        scraper = VitibrasilScraper()
+        resultado_scraping = scraper.scrape_producao()
 
-    if dados is None:
-        return jsonify({'erro': 'Nenhuma tabela encontrada ou erro de acesso'}), 404
+        if resultado_scraping and resultado_scraping.get("dados"):
+            return jsonify(resultado_scraping)
+        elif resultado_scraping and not resultado_scraping.get("dados"):
+            return jsonify({"categoria": "producao", "dados": []}) # Retorna lista vazia se a tabela for encontrada, mas sem dados
+        else:
+            return jsonify({"erro": f"Não foi possível obter os dados de processamento para a categoria 'producao'"}), 500
 
-    return jsonify({'tabela': dados}), 200
+    except ScrapingError as e:
+        return jsonify({"erro": str(e)}), 500
+    except Exception as e:
+        return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
+
+    except ScrapingError as e:
+        return jsonify({"erro": str(e)}), 500
+    except Exception as e:
+        return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
 
 @app.route('/processamento/<categoria>', methods=['GET'])
 def processamento(categoria):

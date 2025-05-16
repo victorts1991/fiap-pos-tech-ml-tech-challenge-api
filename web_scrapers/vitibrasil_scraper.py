@@ -12,18 +12,24 @@ class ScrapingError(Exception):
 
 class VitibrasilScraper:
 
+    # Configuracao para os Mocks
+    useMock = True
+    url_base_for_mocks = 'file:///Users/mac/Desktop/dev/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/'
+
+    # URLs
     url_comercializacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04'
     url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
-
     url_processamento_viniferas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03'
-    #url_processamento_viniferas = 'file:///Users/mac/Desktop/dev/teste%202/processamento_viniferas.html'
     url_americanas_hibridas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03'
-    # url_americanas_hibridas = 'file:///Users/mac/Desktop/dev/teste%202/processamento_americanas_hibridas.html'
     url_uvas_de_mesa = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03'
-    # url_uvas_de_mesa = 'file:///Users/mac/Desktop/dev/teste%202/processamento_uvas_de_mesa.html'
     url_sem_classificacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03'
-    #url_sem_classificacao = 'file:///Users/mac/Desktop/dev/teste%202/processamento_sem_classificacao.html'
-    
+
+    # URL's Mock
+    url_producao_mock = f"{url_base_for_mocks}producao.html"
+    url_processamento_viniferas_mock = f"{url_base_for_mocks}processamento_viniferas.html"
+    url_americanas_hibridas_mock = f"{url_base_for_mocks}processamento_americanas_hibridas.html"
+    url_uvas_de_mesa_mock = f"{url_base_for_mocks}processamento_uvas_de_mesa.html"
+    url_sem_classificacao_mock = f"{url_base_for_mocks}processamento_sem_classificacao.html"
 
     def __init__(self):
         chrome_options = Options()
@@ -36,17 +42,36 @@ class VitibrasilScraper:
 
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
+    def scrape_producao(self, max_retries=3, retry_delay=5):
+        url = self.url_producao
+        if self.useMock: 
+            url = self.url_producao_mock
+
+        return self._scrape_tabela(url, 'producao', max_retries, retry_delay)
+    
     def scrape_processamento_viniferas(self, max_retries=3, retry_delay=5):
-        return self._scrape_tabela(self.url_processamento_viniferas, 'viniferas', max_retries, retry_delay)
+        url = self.url_processamento_viniferas
+        if self.useMock: 
+            url = self.url_processamento_viniferas_mock
+        return self._scrape_tabela(url, 'viniferas', max_retries, retry_delay)
 
     def scrape_processamento_americanas_hibridas(self, max_retries=3, retry_delay=5):
-        return self._scrape_tabela(self.url_americanas_hibridas, 'americanas_hibridas', max_retries, retry_delay)
+        url = self.url_americanas_hibridas
+        if self.useMock: 
+            url = self.url_americanas_hibridas_mock
+        return self._scrape_tabela(url, 'americanas_hibridas', max_retries, retry_delay)
 
     def scrape_processamento_uvas_de_mesa(self, max_retries=3, retry_delay=5):
-        return self._scrape_tabela(self.url_uvas_de_mesa, 'uvas_de_mesa', max_retries, retry_delay)
+        url = self.url_uvas_de_mesa
+        if self.useMock: 
+            url = self.url_uvas_de_mesa_mock
+        return self._scrape_tabela(url, 'uvas_de_mesa', max_retries, retry_delay)
 
     def scrape_processamento_sem_classificacao(self, max_retries=3, retry_delay=5):
-        return self._scrape_tabela(self.url_sem_classificacao, 'sem_classificacao', max_retries, retry_delay)
+        url = self.url_sem_classificacao
+        if self.useMock: 
+            url = self.url_sem_classificacao_mock
+        return self._scrape_tabela(url, 'sem_classificacao', max_retries, retry_delay)
 
     def _scrape_tabela(self, url, categoria, max_retries=3, retry_delay=5):
         for attempt in range(max_retries):
@@ -67,21 +92,32 @@ class VitibrasilScraper:
 
                 if tabela:
                     dados = []
-                    linhas = tabela.find_all("tr")[1:]  # Ignora a linha de cabeçalho
-                    cabecalho_tabela = [th.get_text(strip=True) for th in tabela.find("tr").find_all(["th", "td"])]
+                    thead = tabela.find("thead")
+                    tbody = tabela.find("tbody")
+                    cabecalho_tabela = [th.get_text(strip=True) for th in thead.find_all("th")] if thead else []
+                    linhas = tbody.find_all("tr") if tbody else []
+                    item_principal = None
 
                     for linha in linhas:
                         celulas = linha.find_all("td")
                         if len(celulas) == len(cabecalho_tabela):
-                            item = {"ano": ano, "categoria": categoria}
-                            has_data = False
-                            for i, coluna in enumerate(cabecalho_tabela):
-                                value = celulas[i].get_text(strip=True)
-                                item[coluna.lower().replace(' ', '_').replace('(', '').replace(')', '')] = value
-                                if value and value != '-':  # Considera valores não vazios ou traços como dados
-                                    has_data = True
-                            if has_data:
-                                dados.append(item)
+                            primeira_celula = celulas[0]
+                            classes_primeira_celula = primeira_celula.get('class', [])
+
+                            if 'tb_item' in classes_primeira_celula:
+                                # Nova linha de item principal
+                                item_principal = {"ano": ano, "categoria": categoria}
+                                for i, coluna in enumerate(cabecalho_tabela):
+                                    item_principal[coluna.lower().replace(' ', '_').replace('(', '').replace(')', '')] = celulas[i].get_text(strip=True)
+                                item_principal['subitem'] = []
+                                dados.append(item_principal)
+
+                            elif 'tb_subitem' in classes_primeira_celula and item_principal is not None:
+                                # Linha de subitem para o item principal anterior
+                                subitem = {}
+                                for i, coluna in enumerate(cabecalho_tabela):
+                                    subitem[coluna.lower().replace(' ', '_').replace('(', '').replace(')', '')] = celulas[i].get_text(strip=True)
+                                item_principal['subitem'].append(subitem)
 
                     if not dados and categoria != 'sem_classificacao':
                         raise ScrapingError(f"A tabela com classe 'tb_dados' para a categoria '{categoria}' foi encontrada, mas não contém dados significativos. Possível erro de carregamento.")

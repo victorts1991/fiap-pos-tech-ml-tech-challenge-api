@@ -14,7 +14,7 @@ class VitibrasilScraper:
 
     # Configuracao para os Mocks
     useMock = True
-    url_base_for_mocks = 'file:///Users/mac/Desktop/dev/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/'
+    url_base_for_mocks = "C:/FIAP/Tech Challenge/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
 
     # URLs
     url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
@@ -23,6 +23,15 @@ class VitibrasilScraper:
     url_uvas_de_mesa = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03'
     url_sem_classificacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03'
     url_comercializacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04'
+    url_importacao_vinhos_de_mesa = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_05"
+    url_importacao_espumantes = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_05"
+    url_importacao_uvas_frescas = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_05"
+    url_importacao_uvas_passas = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_05"
+    url_importacao_suco_de_uva = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_05&opcao=opt_05"
+    url_exportacao_vinhos_de_mesa = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_06"
+    url_exportacao_espumantes = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_06"
+    url_exportacao_uvas_frescas = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_06"
+    url_exportacao_suco_de_uva = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_06"
 
     # URL's Mock
     url_producao_mock = f"{url_base_for_mocks}producao.html"
@@ -31,6 +40,16 @@ class VitibrasilScraper:
     url_uvas_de_mesa_mock = f"{url_base_for_mocks}processamento_uvas_de_mesa.html"
     url_sem_classificacao_mock = f"{url_base_for_mocks}processamento_sem_classificacao.html"
     url_comercializacao_mock = f"{url_base_for_mocks}comercializacao.html"
+    url_importacao_vinhos_de_mesa_mock = f"{url_base_for_mocks}importacao_vinhos_de_mesa.html"
+    url_importacao_espumantes_mock = f"{url_base_for_mocks}importacao_espumantes.html"
+    url_importacao_uvas_frescas_mock = f"{url_base_for_mocks}importacao_uvas_frescas.html"
+    url_importacao_uvas_passas_mock = f"{url_base_for_mocks}importacao_uvas_passas.html"
+    url_importacao_suco_de_uva_mock = f"{url_base_for_mocks}importacao_suco_de_uva.html"
+    url_exportacao_vinhos_de_mesa_mock = f"{url_base_for_mocks}exportacao_vinhos_de_mesa.html"
+    url_exportacao_espumantes_mock = f"{url_base_for_mocks}exportacao_espumantes.html"
+    url_exportacao_uvas_frescas_mock = f"{url_base_for_mocks}exportacao_uvas_frescas.html"
+    url_exportacao_suco_de_uva_mock = f"{url_base_for_mocks}exportacao_suco_de_uva.html"
+
 
     def __init__(self):
         chrome_options = Options()
@@ -44,35 +63,60 @@ class VitibrasilScraper:
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
     def scrape_producao(self, max_retries=3, retry_delay=5):
-        url = self.url_producao
-        if self.useMock: 
-            url = self.url_producao_mock
-
+        url = self.url_producao_mock if self.useMock else self.url_producao
         return self._scrape_tabela(url, 'producao', max_retries, retry_delay)
-    
+
     def scrape_processamento_viniferas(self, max_retries=3, retry_delay=5):
-        url = self.url_processamento_viniferas
-        if self.useMock: 
-            url = self.url_processamento_viniferas_mock
+        url = self.url_processamento_viniferas_mock if self.useMock else self.url_processamento_viniferas
         return self._scrape_tabela(url, 'viniferas', max_retries, retry_delay)
 
     def scrape_processamento_americanas_hibridas(self, max_retries=3, retry_delay=5):
-        url = self.url_americanas_hibridas
-        if self.useMock: 
-            url = self.url_americanas_hibridas_mock
+        url = self.url_americanas_hibridas_mock if self.useMock else self.url_americanas_hibridas
         return self._scrape_tabela(url, 'americanas_hibridas', max_retries, retry_delay)
 
     def scrape_processamento_uvas_de_mesa(self, max_retries=3, retry_delay=5):
-        url = self.url_uvas_de_mesa
-        if self.useMock: 
-            url = self.url_uvas_de_mesa_mock
+        url = self.url_uvas_de_mesa_mock if self.useMock else self.url_uvas_de_mesa
         return self._scrape_tabela(url, 'uvas_de_mesa', max_retries, retry_delay)
 
     def scrape_processamento_sem_classificacao(self, max_retries=3, retry_delay=5):
-        url = self.url_sem_classificacao
-        if self.useMock: 
-            url = self.url_sem_classificacao_mock
+        url = self.url_sem_classificacao_mock if self.useMock else self.url_sem_classificacao
         return self._scrape_tabela(url, 'sem_classificacao', max_retries, retry_delay)
+
+    def scrape_processamento_vinhos_de_mesa(self, max_retries=3, retry_delay=5):
+        url = self.url_importacao_vinhos_de_mesa_mock if self.useMock else self.url_importacao_vinhos_de_mesa
+        return self._scrape_tabela_simples(url, 'importacao_vinhos_de_mesa', max_retries, retry_delay)
+
+    def scrape_processamento_espumantes(self, max_retries=3, retry_delay=5):
+        url = self.url_importacao_espumantes_mock if self.useMock else self.url_importacao_espumantes
+        return self._scrape_tabela_simples(url, 'importacao_espumantes', max_retries, retry_delay)
+
+    def scrape_processamento_uvas_frescas(self, max_retries=3, retry_delay=5):
+        url = self.url_importacao_uvas_frescas_mock if self.useMock else self.url_importacao_uvas_frescas
+        return self._scrape_tabela_simples(url, 'importacao_uvas_frescas', max_retries, retry_delay)
+
+    def scrape_processamento_uvas_passas(self, max_retries=3, retry_delay=5):
+        url = self.url_importacao_uvas_passas_mock if self.useMock else self.url_importacao_uvas_passas
+        return self._scrape_tabela_simples(url, 'importacao_uvas_passas', max_retries, retry_delay)
+
+    def scrape_processamento_suco_de_uva(self, max_retries=3, retry_delay=5):
+        url = self.url_importacao_suco_de_uva_mock if self.useMock else self.url_importacao_suco_de_uva
+        return self._scrape_tabela_simples(url, 'importacao_suco_de_uva', max_retries, retry_delay)
+    
+    def scrape_exportacao_vinhos_de_mesa(self, max_retries=3, retry_delay=5):
+        url = self.url_exportacao_vinhos_de_mesa_mock if self.useMock else self.url_exportacao_vinhos_de_mesa
+        return self._scrape_tabela_simples(url, 'exportacao_vinhos_de_mesa', max_retries, retry_delay)
+
+    def scrape_exportacao_espumantes(self, max_retries=3, retry_delay=5):
+        url = self.url_exportacao_espumantes_mock if self.useMock else self.url_exportacao_espumantes
+        return self._scrape_tabela_simples(url, 'exportacao_espumantes', max_retries, retry_delay)
+
+    def scrape_exportacao_uvas_frescas(self, max_retries=3, retry_delay=5):
+        url = self.url_exportacao_uvas_frescas_mock if self.useMock else self.url_exportacao_uvas_frescas
+        return self._scrape_tabela_simples(url, 'exportacao_uvas_frescas', max_retries, retry_delay)
+
+    def scrape_exportacao_suco_de_uva(self, max_retries=3, retry_delay=5):
+        url = self.url_exportacao_suco_de_uva_mock if self.useMock else self.url_exportacao_suco_de_uva
+        return self._scrape_tabela_simples(url, 'exportacao_suco_de_uva', max_retries, retry_delay)
 
     def _scrape_tabela(self, url, categoria, max_retries=3, retry_delay=5):
         for attempt in range(max_retries):
@@ -106,7 +150,6 @@ class VitibrasilScraper:
                             classes_primeira_celula = primeira_celula.get('class', [])
 
                             if 'tb_item' in classes_primeira_celula:
-                                # Nova linha de item principal
                                 item_principal = {"ano": ano, "categoria": categoria}
                                 for i, coluna in enumerate(cabecalho_tabela):
                                     item_principal[coluna.lower().replace(' ', '_').replace('(', '').replace(')', '')] = celulas[i].get_text(strip=True)
@@ -114,7 +157,6 @@ class VitibrasilScraper:
                                 dados.append(item_principal)
 
                             elif 'tb_subitem' in classes_primeira_celula and item_principal is not None:
-                                # Linha de subitem para o item principal anterior
                                 subitem = {}
                                 for i, coluna in enumerate(cabecalho_tabela):
                                     subitem[coluna.lower().replace(' ', '_').replace('(', '').replace(')', '')] = celulas[i].get_text(strip=True)
@@ -135,6 +177,56 @@ class VitibrasilScraper:
 
         raise ScrapingError(f"Falha ao encontrar a tabela com classe 'tb_dados' após {max_retries} tentativas na URL: {url}")
 
-    def __del__(self):
-        if self.driver:
-            self.driver.quit()
+    def _scrape_tabela_simples(self, url, categoria, max_retries=3, retry_delay=5):
+        for attempt in range(max_retries):
+            try:
+                self.driver.get(url)
+                time.sleep(3)
+                html = self.driver.page_source
+                soup = BeautifulSoup(html, 'html.parser')
+
+                titulo = soup.find("p", string=lambda x: x and "[" in x and "]" in x)
+                ano = None
+                if titulo:
+                    match = re.search(r"\[(\d{4})\]", titulo.get_text())
+                    if match:
+                        ano = match.group(1)
+
+                tabela = soup.find("table", class_="tb_dados")
+                if not tabela:
+                    raise ScrapingError(f"Tabela com classe 'tb_dados' não encontrada na tentativa {attempt + 1}.")
+
+                linhas = tabela.find_all("tr")
+                dados = []
+                item_principal = {
+                    "ano": ano,
+                    "categoria": categoria,
+                    "subitem": []
+                }
+
+                for linha in linhas[1:]:
+                    colunas = linha.find_all("td")
+                    if len(colunas) == 3:
+                        pais = colunas[0].get_text(strip=True)
+                        quantidade = colunas[1].get_text(strip=True)
+                        valor = colunas[2].get_text(strip=True)
+
+                        item_principal['subitem'].append({
+                            "pais": pais,
+                            "quantidade_kg": quantidade,
+                            "valor_usd": valor
+                        })
+
+                if item_principal['subitem']:
+                    dados.append(item_principal)
+
+                return {"categoria": categoria, "dados": dados}
+
+            except Exception as e:
+                print(f"[Tentativa {attempt + 1}] Erro: {e}")
+                time.sleep(retry_delay)
+
+        raise ScrapingError(f"Falha ao processar tabela simples da categoria {categoria} após {max_retries} tentativas.")
+    
+    
+

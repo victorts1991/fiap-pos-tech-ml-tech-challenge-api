@@ -124,10 +124,32 @@ def processamento(categoria):
             resultado_scraping = scraper.scrape_processamento_uvas_de_mesa()
         elif categoria == 'sem_classificacao':
             resultado_scraping = scraper.scrape_processamento_sem_classificacao()
+       
+        else:
+            return jsonify({"error": "Categoria inválida"}), 400
+
+        if resultado_scraping and resultado_scraping.get("dados"):
+            return jsonify(resultado_scraping)
+        elif resultado_scraping:
+            return jsonify({"categoria": categoria, "dados": []})
+        else:
+            return jsonify({"erro": f"Não foi possível obter os dados de processamento para a categoria '{categoria}'"}), 500
+
+    except ScrapingError as e:
+        return jsonify({"erro": str(e)}), 500
+    except Exception as e:
+        return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
+
+@app.route('/importacao/<categoria>', methods=['GET'])
+def importacao(categoria):
+    try:
+        scraper = VitibrasilScraper()
+        resultado_scraping = None
+
+        if categoria == 'vinhos_de_mesa':
+            resultado_scraping = scraper.scrape_processamento_vinhos_de_mesa()
         elif categoria == 'espumantes':
             resultado_scraping = scraper.scrape_processamento_espumantes()
-        elif categoria == 'vinhos_de_mesa':
-            resultado_scraping = scraper.scrape_processamento_vinhos_de_mesa()
         elif categoria == 'uvas_frescas':
             resultado_scraping = scraper.scrape_processamento_uvas_frescas()
         elif categoria == 'uvas_passas':
@@ -142,7 +164,7 @@ def processamento(categoria):
         elif resultado_scraping:
             return jsonify({"categoria": categoria, "dados": []})
         else:
-            return jsonify({"erro": f"Não foi possível obter os dados de processamento para a categoria '{categoria}'"}), 500
+            return jsonify({"erro": f"Não foi possível obter os dados de importação para a categoria '{categoria}'"}), 500
 
     except ScrapingError as e:
         return jsonify({"erro": str(e)}), 500
@@ -236,7 +258,13 @@ def hello_world():
 def home():
     return jsonify({
         "mensagem": "API Embrapa Vitivinicultura",
-        "endpoints": ["/producao", "/processamento", "/exportacao"]
+        "endpoints": [
+            "/producao",
+            "/processamento/<categoria>",
+            "/importacao/<categoria>",
+            "/exportacao",
+            "/comercializacao"
+        ]
     })
 
 if __name__ == '__main__':

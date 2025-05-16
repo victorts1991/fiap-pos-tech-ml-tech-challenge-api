@@ -228,5 +228,4 @@ class VitibrasilScraper:
 
         raise ScrapingError(f"Falha ao processar tabela simples da categoria {categoria} após {max_retries} tentativas.")
     
-    
 

@@ -17,12 +17,12 @@ class VitibrasilScraper:
     url_base_for_mocks = 'file:///Users/mac/Desktop/dev/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/'
 
     # URLs
-    url_comercializacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04'
     url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
     url_processamento_viniferas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03'
     url_americanas_hibridas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03'
     url_uvas_de_mesa = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03'
     url_sem_classificacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03'
+    url_comercializacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04'
 
     # URL's Mock
     url_producao_mock = f"{url_base_for_mocks}producao.html"
@@ -30,6 +30,7 @@ class VitibrasilScraper:
     url_americanas_hibridas_mock = f"{url_base_for_mocks}processamento_americanas_hibridas.html"
     url_uvas_de_mesa_mock = f"{url_base_for_mocks}processamento_uvas_de_mesa.html"
     url_sem_classificacao_mock = f"{url_base_for_mocks}processamento_sem_classificacao.html"
+    url_comercializacao_mock = f"{url_base_for_mocks}comercializacao.html"
 
     def __init__(self):
         chrome_options = Options()

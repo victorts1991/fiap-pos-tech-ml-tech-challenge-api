@@ -102,42 +102,29 @@ def login():
 @app.route('/producao', methods=['GET'])
 def producao():
     """
-    Endpoint para extrair a tabela da página de produção.
+    Endpoint para extrair dados da página de produção.
     ---
     responses:
       200:
-        description: Dados da tabela de produção.
-        schema:
-          type: object
-          properties:
-            tabela:
-              type: array
-              items:
-                type: object
+        description: Dados extraídos com sucesso.
       404:
-        description: Nenhuma tabela encontrada na página.
-        schema:
-          type: object
-          properties:
-            erro:
-              type: string
-              example: "Nenhuma tabela encontrada"
+        description: Nenhuma tabela encontrada.
       500:
-        description: Erro ao acessar a URL.
-        schema:
-          type: object
-          properties:
-            erro:
-              type: string
-              example: "Erro ao acessar a URL: ..."
+        description: Erro interno ao tentar extrair os dados.
     """
-    scraper = VitibrasilScraper()
-    dados = scraper.scrape_producao()
+    try:
+        scraper = VitibrasilScraper()
+        dados = scraper.scrape_producao()
 
-    if dados is None:
-        return jsonify({'erro': 'Nenhuma tabela encontrada ou erro de acesso'}), 404
+        if not dados:
+            return jsonify({"erro": "Nenhuma tabela encontrada"}), 404
 
-    return jsonify({'tabela': dados}), 200
+        return jsonify({"producao": dados})
+
+    except ScrapingError as e:
+        return jsonify({"erro": str(e)}), 500
+    except Exception as e:
+        return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
 
 @app.route('/processamento/<categoria>', methods=['GET'])
 def processamento(categoria):

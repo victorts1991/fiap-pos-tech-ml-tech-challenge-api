@@ -1,6 +1,9 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import re
@@ -22,12 +25,14 @@ class VitibrasilScraper:
 
     def __init__(self):
         chrome_options = Options()
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--disable-gpu')
+        # chrome_options.add_argument('--headless')  # Deixe comentado por enquanto
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument('--window-size=1920x1080')
-        chrome_options.add_argument('--user-agent=Mozilla/5.0')
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--window-size=1920,1080')
+        chrome_options.add_argument('--disable-extensions')
+        chrome_options.add_argument('--remote-debugging-port=9222')
+
 
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
@@ -43,14 +48,27 @@ class VitibrasilScraper:
     def scrape_processamento_sem_classificacao(self, max_retries=3, retry_delay=5):
         return self._scrape_tabela(self.url_sem_classificacao, 'sem_classificacao', max_retries, retry_delay)
 
-    def _scrape_tabela(self, url, categoria, max_retries=3, retry_delay=5):
+    def scrape_producao(self, max_retries=3, retry_delay=5):
         for attempt in range(max_retries):
             try:
-                self.driver.get(url)
-                time.sleep(3)
+                print(f"Tentativa {attempt + 1}: acessando página de produção...")
+                self.driver.get(self.url_producao)
+
+                # Espera até que qualquer tabela apareça na página
+                WebDriverWait(self.driver, 10).until(
+                    EC.presence_of_element_located((By.TAG_NAME, "table"))
+                )
+
                 html = self.driver.page_source
+
+                # Salva o HTML para debug
+                with open("debug_producao.html", "w", encoding="utf-8") as f:
+                    f.write(html)
+                print("✅ HTML salvo em debug_producao.html")
+
                 soup = BeautifulSoup(html, 'html.parser')
 
+                # Extrai o ano do título (ex: [2023])
                 titulo = soup.find("p", string=lambda x: x and "[" in x and "]" in x)
                 ano = None
                 if titulo:
@@ -60,48 +78,48 @@ class VitibrasilScraper:
 
                 tabela = None
                 for t in soup.find_all("table"):
-                    primeira_linha = t.find("tr")
-                    if not primeira_linha:
+                    linhas = t.find_all("tr")
+                    if not linhas:
                         continue
-                    cabecalho_elementos = primeira_linha.find_all(["th", "td"])
-                    if cabecalho_elementos:
-                        cabecalho = [th.get_text(strip=True).upper() for th in cabecalho_elementos]
-                        if "CULTIVAR" in cabecalho or "SEM DEFINIÇÃO" in cabecalho:
-                            tabela = t
-                            break
+                    cabecalho = linhas[0]
+                    colunas = [
+                        c.get_text(strip=True).lower().replace("(l)", "").replace("(litros)", "").strip()
+                        for c in cabecalho.find_all(["th", "td"])
+                    ]
+                    if any("produto" in c for c in colunas) and any("quantidade" in c for c in colunas):
+                        tabela = t
+                        break
 
-                if tabela:
-                    dados = []
-                    linhas = tabela.find_all("tr")[1:]  # Ignora a linha de cabeçalho
-                    cabecalho_tabela = [th.get_text(strip=True) for th in tabela.find("tr").find_all(["th", "td"])]
+                if not tabela:
+                    raise ScrapingError("Tabela de produção não encontrada.")
 
-                    for linha in linhas:
-                        celulas = linha.find_all("td")
-                        if len(celulas) == len(cabecalho_tabela):
-                            item = {"ano": ano, "categoria": categoria}
-                            has_data = False
-                            for i, coluna in enumerate(cabecalho_tabela):
-                                value = celulas[i].get_text(strip=True)
-                                item[coluna.lower().replace(' ', '_').replace('(', '').replace(')', '')] = value
-                                if value and value != '-':  # Considera valores não vazios ou traços como dados
-                                    has_data = True
-                            if has_data:
-                                dados.append(item)
+                linhas = tabela.find_all("tr")
+                cabecalho = [th.get_text(strip=True) for th in linhas[0].find_all(["th", "td"])]
+                dados = []
 
-                    if not dados and categoria != 'sem_classificacao':
-                        raise ScrapingError(f"A tabela para a categoria '{categoria}' foi encontrada, mas não contém dados significativos. Possível erro de carregamento.")
+                for linha in linhas[1:]:  # ignora o cabeçalho
+                    colunas = linha.find_all("td")
+                    if len(colunas) != len(cabecalho):
+                        continue  # ignora linhas malformadas
 
-                    return {"categoria": categoria, "dados": dados}
-                else:
-                    print(f"Tabela não encontrada na URL {url} na tentativa {attempt + 1}.")
-                    time.sleep(retry_delay)
+                    item = {"ano": ano}
+                    for i in range(len(cabecalho)):
+                        chave = (
+                            cabecalho[i]
+                            .strip()
+                            .lower()
+                            .replace(" ", "_")
+                            .replace("(", "")
+                            .replace(")", "")
+                        )
+                        valor = colunas[i].get_text(strip=True)
+                        item[chave] = valor
+                    dados.append(item)
+
+                return dados
 
             except Exception as e:
-                print(f"Erro ao processar URL {url} na tentativa {attempt + 1}: {e}")
+                print(f"[Erro - Produção] Tentativa {attempt + 1}: {e}")
                 time.sleep(retry_delay)
 
-        raise ScrapingError(f"Falha ao encontrar a tabela após {max_retries} tentativas na URL: {url}")
-
-    def __del__(self):
-        if self.driver:
-            self.driver.quit()
+        raise ScrapingError("Erro ao obter os dados da produção após várias tentativas.")

@@ -19,9 +19,14 @@ class VitibrasilScraper:
     url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
 
     url_processamento_viniferas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03'
+    #url_processamento_viniferas = 'file:///Users/mac/Desktop/dev/teste%202/processamento_viniferas.html'
     url_americanas_hibridas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03'
+    # url_americanas_hibridas = 'file:///Users/mac/Desktop/dev/teste%202/processamento_americanas_hibridas.html'
     url_uvas_de_mesa = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03'
+    # url_uvas_de_mesa = 'file:///Users/mac/Desktop/dev/teste%202/processamento_uvas_de_mesa.html'
     url_sem_classificacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03'
+    #url_sem_classificacao = 'file:///Users/mac/Desktop/dev/teste%202/processamento_sem_classificacao.html'
+    
 
     def __init__(self):
         chrome_options = Options()
@@ -76,6 +81,7 @@ class VitibrasilScraper:
                     if match:
                         ano = match.group(1)
 
+<<<<<<< HEAD
                 tabela = None
                 for t in soup.find_all("table"):
                     linhas = t.find_all("tr")
@@ -89,6 +95,9 @@ class VitibrasilScraper:
                     if any("produto" in c for c in colunas) and any("quantidade" in c for c in colunas):
                         tabela = t
                         break
+=======
+                tabela = soup.find("table", class_="tb_dados")
+>>>>>>> origin/main
 
                 if not tabela:
                     raise ScrapingError("Tabela de produção não encontrada.")
@@ -97,6 +106,7 @@ class VitibrasilScraper:
                 cabecalho = [th.get_text(strip=True) for th in linhas[0].find_all(["th", "td"])]
                 dados = []
 
+<<<<<<< HEAD
                 for linha in linhas[1:]:  # ignora o cabeçalho
                     colunas = linha.find_all("td")
                     if len(colunas) != len(cabecalho):
@@ -117,9 +127,27 @@ class VitibrasilScraper:
                     dados.append(item)
 
                 return dados
+=======
+                    if not dados and categoria != 'sem_classificacao':
+                        raise ScrapingError(f"A tabela com classe 'tb_dados' para a categoria '{categoria}' foi encontrada, mas não contém dados significativos. Possível erro de carregamento.")
+
+                    return {"categoria": categoria, "dados": dados}
+                else:
+                    print(f"Tabela com classe 'tb_dados' não encontrada na URL {url} na tentativa {attempt + 1}.")
+                    time.sleep(retry_delay)
+>>>>>>> origin/main
 
             except Exception as e:
                 print(f"[Erro - Produção] Tentativa {attempt + 1}: {e}")
                 time.sleep(retry_delay)
+                raise
 
+<<<<<<< HEAD
         raise ScrapingError("Erro ao obter os dados da produção após várias tentativas.")
+=======
+        raise ScrapingError(f"Falha ao encontrar a tabela com classe 'tb_dados' após {max_retries} tentativas na URL: {url}")
+
+    def __del__(self):
+        if self.driver:
+            self.driver.quit()
+>>>>>>> origin/main

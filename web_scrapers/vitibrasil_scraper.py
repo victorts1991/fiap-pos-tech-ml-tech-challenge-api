@@ -14,8 +14,8 @@ class VitibrasilScraper:
 
     # Configuracao para os Mocks
     useMock = True
-    # url_base_for_mocks = "C:/FIAP/Tech Challenge/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
-    url_base_for_mocks = "file:///Users/mac/Desktop/dev/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
+    url_base_for_mocks = "C:/FIAP/Tech Challenge/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
+    # url_base_for_mocks = "file:///Users/mac/Desktop/dev/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
 
     # URLs
     url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
@@ -87,16 +87,10 @@ class VitibrasilScraper:
         url = self.url_comercializacao_mock if self.useMock else self.url_comercializacao
         return self._scrape_tabela(url, 'comercializacao', max_retries, retry_delay)
 
-
-
-
-
     def scrape_importacao_vinhos_de_mesa(self, max_retries=3, retry_delay=5):
         url = self.url_importacao_vinhos_de_mesa_mock if self.useMock else self.url_importacao_vinhos_de_mesa
         return self._scrape_tabela_simples(url, 'importacao_vinhos_de_mesa', max_retries, retry_delay)
     
-    
-
     def scrape_importacao_espumantes(self, max_retries=3, retry_delay=5):
         url = self.url_importacao_espumantes_mock if self.useMock else self.url_importacao_espumantes
         return self._scrape_tabela_simples(url, 'importacao_espumantes', max_retries, retry_delay)
@@ -112,7 +106,7 @@ class VitibrasilScraper:
     def scrape_importacao_suco_de_uva(self, max_retries=3, retry_delay=5):
         url = self.url_importacao_suco_de_uva_mock if self.useMock else self.url_importacao_suco_de_uva
         return self._scrape_tabela_simples(url, 'importacao_suco_de_uva', max_retries, retry_delay)
-    
+
     def scrape_exportacao_vinhos_de_mesa(self, max_retries=3, retry_delay=5):
         url = self.url_exportacao_vinhos_de_mesa_mock if self.useMock else self.url_exportacao_vinhos_de_mesa
         return self._scrape_tabela_simples(url, 'exportacao_vinhos_de_mesa', max_retries, retry_delay)
@@ -239,4 +233,3 @@ class VitibrasilScraper:
 
         raise ScrapingError(f"Falha ao processar tabela simples da categoria {categoria} após {max_retries} tentativas.")
     
-

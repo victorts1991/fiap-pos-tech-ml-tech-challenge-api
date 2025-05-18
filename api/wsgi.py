@@ -1,1 +1,1 @@
-from api import app as application
+from api import app

@@ -23,7 +23,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Deploy para Vercel
-        uses: vercel/vercel-action@v12
+        uses: vercel/vercel-action@v11 
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           scope: ${{ secrets.VERCEL_SCOPE }} 

@@ -19,33 +19,11 @@ JWT_EXP_DELTA_SECONDS = 3600
  
 app = Flask(__name__)
 app.config['SWAGGER'] = {
-    'title': 'My Flask API',
+    'title': 'Fiap Post Tech Machine Learning API Tech Challenge',
     'uiversion': 3
 }
 
 swagger = Swagger(app) 
-
-def extrair_tabela(url):
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        return jsonify({"error": e}), 500
-
-    soup = BeautifulSoup(response.text, 'html.parser')
-    tabelas = soup.find_all('table')
-
-    if not tabelas:
-        return jsonify({"error": "Item not found"}), 404
-
-    dados = []
-    if tabelas:
-        linhas = tabelas[0].find_all('tr')
-        for linha in linhas:
-            colunas = linha.find_all(['td','th'])
-            dados.append([col.text.strip() for col in colunas])
-
-    return jsonify({'tabela': dados})
 
 TEST_USERNAME = "admin"
 TEST_PASSWORD = "secret"
@@ -93,6 +71,7 @@ def login():
         return jsonify({"error": "Credenciais inválidas"}), 401
 
 @app.route('/producao', methods=['GET'])
+@token_required
 def producao():
     try:
         scraper = VitibrasilScraper()
@@ -111,6 +90,7 @@ def producao():
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
 
 @app.route('/processamento/<categoria>', methods=['GET'])
+@token_required
 def processamento(categoria):
     try:
         scraper = VitibrasilScraper()
@@ -141,6 +121,7 @@ def processamento(categoria):
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
 
 @app.route('/comercializacao', methods=['GET'])
+@token_required
 def comercializacao():
     try:
         scraper = VitibrasilScraper()
@@ -158,8 +139,8 @@ def comercializacao():
     except Exception as e:
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
     
-
 @app.route('/importacao/<categoria>', methods=['GET'])
+@token_required
 def importacao(categoria):
     try:
         scraper = VitibrasilScraper()
@@ -189,94 +170,41 @@ def importacao(categoria):
         return jsonify({"erro": str(e)}), 500
     except Exception as e:
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
-
-
-@app.route('/exportacao', methods=['GET'])
-def exportacao():
-    url = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_06'
-
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-
-    driver = webdriver.Chrome(options=chrome_options)
-
+    
+@app.route('/exportacao/<categoria>', methods=['GET'])
+@token_required
+def exportacao(categoria):
     try:
-        driver.get(url)
-        time.sleep(3)
+        scraper = VitibrasilScraper()
+        resultado_scraping = None
 
-        html = driver.page_source
-        soup = BeautifulSoup(html, 'html.parser')
+        if categoria == 'vinhos_de_mesa':
+            resultado_scraping = scraper.scrape_exportacao_vinhos_de_mesa()
+        elif categoria == 'espumantes':
+            resultado_scraping = scraper.scrape_exportacao_espumantes()
+        elif categoria == 'uvas_frescas':
+            resultado_scraping = scraper.scrape_exportacao_uvas_frescas()
+        elif categoria == 'suco_de_uva':
+            resultado_scraping = scraper.scrape_exportacao_suco_de_uva()
+        else:
+            return jsonify({"error": "Categoria inválida"}), 400
 
-        titulo = soup.find("p", string=lambda x: x and "[" in x and "]" in x)
-        ano = None
-        if titulo:
-            match = re.search(r"\[(\d{4})\]", titulo.get_text())
-            if match:
-                ano = match.group(1)
+        if resultado_scraping and resultado_scraping.get("dados"):
+            return jsonify(resultado_scraping)
+        elif resultado_scraping:
+            return jsonify({"categoria": categoria, "dados": []})
+        else:
+            return jsonify({"erro": f"Não foi possível obter os dados de importação para a categoria '{categoria}'"}), 500
 
-        tabelas = soup.find_all("table")
-        tabela_dados = None
-
-        for tabela in tabelas:
-            linhas = tabela.find_all("tr")
-            if not linhas:
-                continue
-
-            cabecalho = [col.get_text(strip=True) for col in linhas[0].find_all(["td", "th"])]
-            if set(["Países", "Quantidade (Kg)", "Valor (US$)"]).issubset(set(cabecalho)):
-                tabela_dados = tabela
-                break
-
-        if not tabela_dados:
-            return jsonify({"erro": "Tabela de exportação não encontrada"}), 404
-
-        dados = []
-
-        for linha in tabela_dados.find_all("tr")[1:]:
-            colunas = linha.find_all("td")
-            if len(colunas) != 3:
-                continue
-
-            pais = colunas[0].get_text(strip=True)
-            quantidade = colunas[1].get_text(strip=True)
-            valor = colunas[2].get_text(strip=True)
-
-            if not pais or (quantidade == "-" and valor == "-"):
-                continue
-
-            dados.append({
-                "ano": ano,
-                "pais": pais,
-                "quantidade_kg": quantidade,
-                "valor_usd": valor
-            })
-
-        return jsonify({"exportacao": dados})
-
-    except Exception as e:
+    except ScrapingError as e:
         return jsonify({"erro": str(e)}), 500
+    except Exception as e:
+        return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
 
-    finally:
-        driver.quit()
-
-@app.route('/hello-world', methods=['GET'])
+@app.route('/health', methods=['GET'])
 @token_required
 def hello_world():
     return 'OK'
-
-@app.route('/')
-def home():
-    return jsonify({
-        "mensagem": "API Embrapa Vitivinicultura",
-        "endpoints": [
-            "/producao",
-            "/processamento/<categoria>",
-            "/importacao/<categoria>",
-            "/exportacao",
-            "/comercializacao"
-        ]
-    })
 
 if __name__ == '__main__':
     app.run(debug=True)

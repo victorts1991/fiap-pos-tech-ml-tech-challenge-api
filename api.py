@@ -455,7 +455,6 @@ def exportacao(categoria):
 
 
 @app.route('/health', methods=['GET'])
-@token_required
 def hello_world():
     return 'OK'
 

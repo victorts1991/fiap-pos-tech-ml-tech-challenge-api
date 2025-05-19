@@ -2,18 +2,18 @@
   "version": 2,
   "builds": [
     {
-      "src": "wsgi.py",
+      "src": "api.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/api/health",
-      "dest": "/wsgi.py/health"
+      "src": "/health",
+      "dest": "/api.py"
     },
     {
       "src": "/(.*)",
-      "dest": "/wsgi.py/$1"
+      "dest": "api.py"
     }
   ]
 }

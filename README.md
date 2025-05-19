@@ -38,4 +38,3 @@ http://127.0.0.1:5000/apidocs
 # Exemplo de como ficaria no Vercel
 https://fiap-pos-tech-ml-tech-challenge-api.vercel.app/apidocs/
 ```
-```

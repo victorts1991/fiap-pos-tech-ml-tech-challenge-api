@@ -459,5 +459,10 @@ def exportacao(categoria):
 def hello_world():
     return 'OK'
 
+@app.route('/')
+def index():
+    return 'API está funcionando!'
+
+
 if __name__ == '__main__':
     app.run(debug=True)

@@ -61,6 +61,45 @@ def token_required(f):
 
 @app.route("/login", methods=["POST"])
 def login():
+    """
+    Endpoint para login e geração de token JWT.
+    ---
+    tags:
+      - Autenticação
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+                example: admin
+              password:
+                type: string
+                example: secret
+    responses:
+      200:
+        description: Token JWT gerado com sucesso
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+      401:
+        description: Credenciais inválidas
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: Credenciais inválidas
+    """
     data = request.get_json(force=True)
     username = data.get("username")
     password = data.get("password")
@@ -70,9 +109,42 @@ def login():
     else:
         return jsonify({"error": "Credenciais inválidas"}), 401
 
+
 @app.route('/producao', methods=['GET'])
 @token_required
 def producao():
+    """
+    Endpoint para obter dados de produção de uvas e derivados.
+    ---
+    tags:
+      - Produção
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Dados de produção retornados com sucesso
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoria:
+                  type: string
+                  example: producao
+                dados:
+                  type: array
+                  items:
+                    type: object
+      500:
+        description: Erro ao obter os dados de produção
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                erro:
+                  type: string
+    """
     try:
         scraper = VitibrasilScraper()
         resultado_scraping = scraper.scrape_producao()
@@ -89,9 +161,59 @@ def producao():
     except Exception as e:
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
 
+
 @app.route('/processamento/<categoria>', methods=['GET'])
 @token_required
 def processamento(categoria):
+    """
+    Endpoint para obter dados de processamento de uvas por categoria.
+    ---
+    tags:
+      - Processamento
+    parameters:
+      - name: categoria
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [viniferas, americanas_hibridas, uvas_de_mesa, sem_classificacao]
+        description: Categoria de processamento a ser consultada.
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Dados de processamento retornados com sucesso
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoria:
+                  type: string
+                dados:
+                  type: array
+                  items:
+                    type: object
+      400:
+        description: Categoria inválida
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: Categoria inválida
+      500:
+        description: Erro inesperado ao processar os dados
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                erro:
+                  type: string
+    """
     try:
         scraper = VitibrasilScraper()
         resultado_scraping = None
@@ -104,7 +226,6 @@ def processamento(categoria):
             resultado_scraping = scraper.scrape_processamento_uvas_de_mesa()
         elif categoria == 'sem_classificacao':
             resultado_scraping = scraper.scrape_processamento_sem_classificacao()
-       
         else:
             return jsonify({"error": "Categoria inválida"}), 400
 
@@ -120,9 +241,42 @@ def processamento(categoria):
     except Exception as e:
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
 
+
 @app.route('/comercializacao', methods=['GET'])
 @token_required
 def comercializacao():
+    """
+    Endpoint para obter dados de comercialização de derivados de uva.
+    ---
+    tags:
+      - Comercialização
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Dados de comercialização retornados com sucesso
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoria:
+                  type: string
+                  example: comercializacao
+                dados:
+                  type: array
+                  items:
+                    type: object
+      500:
+        description: Erro ao obter dados de comercialização
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                erro:
+                  type: string
+    """
     try:
         scraper = VitibrasilScraper()
         resultado_scraping = scraper.scrape_comercializacao()
@@ -138,10 +292,59 @@ def comercializacao():
         return jsonify({"erro": str(e)}), 500
     except Exception as e:
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
+
     
 @app.route('/importacao/<categoria>', methods=['GET'])
 @token_required
 def importacao(categoria):
+    """
+    Endpoint para obter dados de importação por categoria.
+    ---
+    tags:
+      - Importação
+    parameters:
+      - name: categoria
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [vinhos_de_mesa, espumantes, uvas_frescas, uvas_passas, suco_de_uva]
+        description: Categoria dos produtos importados
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Dados de importação retornados com sucesso
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoria:
+                  type: string
+                dados:
+                  type: array
+                  items:
+                    type: object
+      400:
+        description: Categoria inválida
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+      500:
+        description: Erro ao obter dados de importação
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                erro:
+                  type: string
+    """
     try:
         scraper = VitibrasilScraper()
         resultado_scraping = None
@@ -170,10 +373,59 @@ def importacao(categoria):
         return jsonify({"erro": str(e)}), 500
     except Exception as e:
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
+
     
 @app.route('/exportacao/<categoria>', methods=['GET'])
 @token_required
 def exportacao(categoria):
+    """
+    Endpoint para obter dados de exportação por categoria.
+    ---
+    tags:
+      - Exportação
+    parameters:
+      - name: categoria
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [vinhos_de_mesa, espumantes, uvas_frescas, suco_de_uva]
+        description: Categoria dos produtos exportados
+    security:
+      - Bearer: []
+    responses:
+      200:
+        description: Dados de exportação retornados com sucesso
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoria:
+                  type: string
+                dados:
+                  type: array
+                  items:
+                    type: object
+      400:
+        description: Categoria inválida
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+      500:
+        description: Erro ao obter dados de exportação
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                erro:
+                  type: string
+    """
     try:
         scraper = VitibrasilScraper()
         resultado_scraping = None
@@ -194,12 +446,13 @@ def exportacao(categoria):
         elif resultado_scraping:
             return jsonify({"categoria": categoria, "dados": []})
         else:
-            return jsonify({"erro": f"Não foi possível obter os dados de importação para a categoria '{categoria}'"}), 500
+            return jsonify({"erro": f"Não foi possível obter os dados de exportação para a categoria '{categoria}'"}), 500
 
     except ScrapingError as e:
         return jsonify({"erro": str(e)}), 500
     except Exception as e:
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
+
 
 @app.route('/health', methods=['GET'])
 @token_required

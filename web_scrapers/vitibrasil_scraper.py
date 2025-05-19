@@ -13,7 +13,7 @@ class ScrapingError(Exception):
 class VitibrasilScraper:
 
     # Configuracao para os Mocks
-    useMock = True
+    useMock = False
     url_base_for_mocks = "C:/FIAP/Tech Challenge/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
     # url_base_for_mocks = "file:///Users/mac/Desktop/dev/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
 

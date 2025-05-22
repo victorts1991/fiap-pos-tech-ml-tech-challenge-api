@@ -1,10 +1,11 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import re
 import time
+import os
 
 class ScrapingError(Exception):
     """Exceção personalizada para erros de scraping."""
@@ -57,11 +58,41 @@ class VitibrasilScraper:
         chrome_options.add_argument('--headless')
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--disable-dev-shm-usage') 
         chrome_options.add_argument('--window-size=1920x1080')
         chrome_options.add_argument('--user-agent=Mozilla/5.0')
 
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        # **** ATENÇÃO: Caminhos específicos do Heroku Buildpack ****
+        # O buildpack heroku/google-chrome instala o Chrome aqui:
+        chrome_options.binary_location = os.environ.get('GOOGLE_CHROME_BIN', "/app/.apt/usr/bin/google-chrome")
+
+        # O buildpack heroku/chromedriver instala o ChromeDriver aqui:
+        # Se você usar o buildpack apenas para Chrome e não ChromeDriver,
+        # pode tentar usar webdriver-manager. Mas é mais fácil deixar o buildpack fornecer ambos.
+        # No Heroku, o ChromeDriver está geralmente em /app/.chromedriver/bin/chromedriver
+        chromedriver_path = os.environ.get('CHROMEDRIVER_PATH', "/app/.chromedriver/bin/chromedriver")
+        
+        # O webdriver-manager pode ser usado para baixar e gerenciar o driver localmente,
+        # mas no Heroku, é melhor confiar no que o buildpack fornece.
+        # Vamos usar o Service com o caminho do buildpack.
+        
+        # Verificar se o binário do Chrome e o ChromeDriver existem
+        if not os.path.exists(chrome_options.binary_location):
+            raise ScrapingError(f"Chrome binário não encontrado em: {chrome_options.binary_location}")
+        if not os.path.exists(chromedriver_path):
+            raise ScrapingError(f"ChromeDriver não encontrado em: {chromedriver_path}")
+        
+        # Adicionar permissões de execução para o ChromeDriver
+        os.chmod(chromedriver_path, 0o755)
+
+        # Crie o Service com o caminho do ChromeDriver do buildpack
+        service = Service(executable_path=chromedriver_path)
+
+        self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        
+    def __del__(self):
+        if hasattr(self, 'driver'):
+            self.driver.quit()
 
     def scrape_producao(self, max_retries=3, retry_delay=5):
         url = self.url_producao_mock if self.useMock else self.url_producao

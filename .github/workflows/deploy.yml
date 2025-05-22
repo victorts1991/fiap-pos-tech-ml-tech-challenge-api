@@ -35,4 +35,4 @@ jobs:
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: "pos-tech-ml-tech-challenge-api"
-          heroku_email: "victorts1991@gmail.com" # Lembre-se de substituir
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}

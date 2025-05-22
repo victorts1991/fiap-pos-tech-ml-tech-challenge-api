@@ -29,15 +29,18 @@
     * Clique na sua foto de perfil (canto superior direito) e vá em **Account settings** (Configurações da conta).
     * Role a página até a seção **API Key** (Chave de API).
     * Clique em **Reveal** (Revelar) e **copie** a chave gerada.
-7.  **Configure o Secret no GitHub Actions:**
+7.  **Configure os Secrets no GitHub Actions:**
+    Você precisará configurar dois Secrets no GitHub: um para a chave de API e outro para o seu e-mail do Heroku.
     * No seu repositório do GitHub, vá em **Settings** (Configurações).
     * Clique em **Secrets and variables** > **Actions** (Segredos e variáveis > Ações).
-    * Clique em **New repository secret** (Novo segredo do repositório).
-    * **Nome:** `HEROKU_API_KEY`
-    * **Valor:** Cole a chave de API do Heroku que você copiou.
-    * Clique em **Add secret**.
+    * Clique em **New repository secret** (Novo segredo do repositório) e crie os dois secrets abaixo:
+        * **Nome:** `HEROKU_API_KEY`
+        * **Valor:** Cole a chave de API do Heroku que você copiou.
+        * **Nome:** `HEROKU_EMAIL`
+        * **Valor:** Digite o e-mail associado à sua conta Heroku.
+    * Clique em **Add secret** para cada um.
 8.  **Faça um push para a branch `main`:**
-    Após configurar o secret e ter o seu workflow do GitHub Actions atualizado para o Heroku, qualquer commit na branch `main` irá acionar o pipeline do GitHub Actions, que fará o deploy automático do projeto na plataforma Heroku.
+    Após configurar os secrets e ter o seu workflow do GitHub Actions atualizado para o Heroku, qualquer commit na branch `main` irá acionar o pipeline do GitHub Actions, que fará o deploy automático do projeto na plataforma Heroku.
 
 ---
 

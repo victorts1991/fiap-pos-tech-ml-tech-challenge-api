@@ -1,0 +1,43 @@
+name: Deploy para Heroku na Main
+
+on:
+  push:
+    branches:
+      - main # O workflow será acionado sempre que houver push para a branch 'main'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # O runner do GitHub Actions
+
+    steps:
+      - name: Fazer checkout do código
+        uses: actions/checkout@v4 # Clona seu repositório
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9' # Garante que Python 3.9 seja usado
+
+      - name: Instalar dependências Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # Para o Heroku, as dependências do Chrome/ChromeDriver são instaladas
+          # pelos buildpacks, então não precisamos de comandos NPM/Playwright aqui.
+          
+      - name: Adicionar remote do Heroku
+        run: |
+          git remote add heroku https://git.heroku.com/pos-tech-ml-tech-challenge-api.git
+          # Isso é para o caso de o remote 'heroku' não estar configurado no ambiente do Actions.
+
+      - name: Fazer deploy para Heroku
+        # Este é o comando principal de deploy para o Heroku via Git
+        # Usamos HTTPS e passamos o token de API do Heroku (gerado no Dashboard Heroku)
+        # O token VERCEL_TOKEN não é mais usado, você precisará criar VERCEL_API_KEY no Heroku
+        run: |
+          git push --force https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/pos-tech-ml-tech-challenge-api.git main
+        env:
+          # É uma boa prática usar a mesma variável de ambiente para o token
+          # que o Heroku CLI usa, mas neste caso, estamos passando na URL.
+          # A variável de ambiente HOME é importante para o git.
+          HOME: /tmp

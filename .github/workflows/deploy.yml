@@ -27,17 +27,13 @@ jobs:
           
       - name: Adicionar remote do Heroku
         run: |
-          git remote add heroku https://git.heroku.com/pos-tech-ml-tech-challenge-api.git
-          # Isso é para o caso de o remote 'heroku' não estar configurado no ambiente do Actions.
+          git remote add heroku https://git.heroku.com/pos-tech-ml-tech-challenge-api.git || true
+          # O '|| true' faz com que este comando não falhe se o remote já existir.
 
       - name: Fazer deploy para Heroku
-        # Este é o comando principal de deploy para o Heroku via Git
-        # Usamos HTTPS e passamos o token de API do Heroku (gerado no Dashboard Heroku)
-        # O token VERCEL_TOKEN não é mais usado, você precisará criar VERCEL_API_KEY no Heroku
+        # Força o push para o Heroku para sobrescrever o histórico
         run: |
           git push --force https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/pos-tech-ml-tech-challenge-api.git main
         env:
-          # É uma boa prática usar a mesma variável de ambiente para o token
-          # que o Heroku CLI usa, mas neste caso, estamos passando na URL.
-          # A variável de ambiente HOME é importante para o git.
+          # A variável de ambiente HOME é importante para o git, especialmente para autenticação.
           HOME: /tmp

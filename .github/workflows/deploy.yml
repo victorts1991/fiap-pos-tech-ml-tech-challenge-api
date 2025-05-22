@@ -30,15 +30,6 @@ jobs:
           git remote add heroku https://git.heroku.com/pos-tech-ml-tech-challenge-api.git
           # Isso é para o caso de o remote 'heroku' não estar configurado no ambiente do Actions.
 
-      - name: Configurar chave SSH para o Heroku (opcional, mas mais seguro para pushes)
-        # Este passo é mais seguro que passar o token direto na URL.
-        # Você precisará configurar uma chave SSH no Heroku e adicioná-la aos seus secrets do GitHub.
-        # No entanto, para o deploy inicial, podemos tentar o método mais simples com o token (abaixo).
-        # Se o deploy direto (passo seguinte) não funcionar, voltamos para SSH.
-        
-        # O método mais comum é usar um token de API (abaixo)
-        # ou configurar uma chave SSH como heroku-cli-deploy faria.
-
       - name: Fazer deploy para Heroku
         # Este é o comando principal de deploy para o Heroku via Git
         # Usamos HTTPS e passamos o token de API do Heroku (gerado no Dashboard Heroku)

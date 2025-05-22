@@ -1,37 +1,52 @@
-name: Deploy para Vercel na Main
+name: Deploy para Heroku na Main
 
 on:
   push:
     branches:
-      - main
+      - main # O workflow será acionado sempre que houver push para a branch 'main'
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # O runner do GitHub Actions
+
     steps:
       - name: Fazer checkout do código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # Clona seu repositório
 
       - name: Configurar Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.9' # Garante que Python 3.9 seja usado
 
-      - name: Instalar dependências
+      - name: Instalar dependências Python
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          # Para o Heroku, as dependências do Chrome/ChromeDriver são instaladas
+          # pelos buildpacks, então não precisamos de comandos NPM/Playwright aqui.
+          
+      - name: Adicionar remote do Heroku
+        run: |
+          git remote add heroku https://git.heroku.com/pos-tech-ml-tech-challenge-api.git
+          # Isso é para o caso de o remote 'heroku' não estar configurado no ambiente do Actions.
 
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
-      - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --archive=tgz
-
+      - name: Configurar chave SSH para o Heroku (opcional, mas mais seguro para pushes)
+        # Este passo é mais seguro que passar o token direto na URL.
+        # Você precisará configurar uma chave SSH no Heroku e adicioná-la aos seus secrets do GitHub.
+        # No entanto, para o deploy inicial, podemos tentar o método mais simples com o token (abaixo).
+        # Se o deploy direto (passo seguinte) não funcionar, voltamos para SSH.
         
+        # O método mais comum é usar um token de API (abaixo)
+        # ou configurar uma chave SSH como heroku-cli-deploy faria.
+
+      - name: Fazer deploy para Heroku
+        # Este é o comando principal de deploy para o Heroku via Git
+        # Usamos HTTPS e passamos o token de API do Heroku (gerado no Dashboard Heroku)
+        # O token VERCEL_TOKEN não é mais usado, você precisará criar VERCEL_API_KEY no Heroku
+        run: |
+          git push https://heroku:${{ secrets.HEROKU_API_KEY }}@git.heroku.com/pos-tech-ml-tech-challenge-api.git main
+        env:
+          # É uma boa prática usar a mesma variável de ambiente para o token
+          # que o Heroku CLI usa, mas neste caso, estamos passando na URL.
+          # A variável de ambiente HOME é importante para o git.
+          HOME: /tmp

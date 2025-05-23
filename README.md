@@ -137,3 +137,6 @@ TODO:
 - Alterar as urls para o https://app.scrapingbee.com/dashboard
 - Colocar a chave de api como variavel de ambiente do Github Actions
 - Adicionar ano nos endpoints
+
+
+heroku config:set SCRAPINGBEE_API_KEY="VSBAJ770FRYITIXB7UI0UGXJ6YHON2YFATX5U28C6SKG3KV5UFPNFMGIQ3Q9XG9ORSBZW45VO5FG2HRO" -a pos-tech-ml-tech-challenge-api

@@ -136,5 +136,4 @@ TODO:
 
 - Alterar as urls para o https://app.scrapingbee.com/dashboard
 - Colocar a chave de api como variavel de ambiente do Github Actions
-- Alterar as urls de scraper
 - Adicionar ano nos endpoints

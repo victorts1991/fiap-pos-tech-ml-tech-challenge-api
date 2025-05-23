@@ -133,77 +133,86 @@ class VitibrasilScraper:
             except WebDriverException as e:
                 print(f"Aviso: Erro ao fechar o WebDriver: {e}")
 
-    def get_url(self, base_url_name):
+    def get_url(self, base_url_name, ano=None):
         """
-        Retorna a URL apropriada (mock, local ou scrapingbee) com base nas configurações da instância.
+        Retorna a URL apropriada (mock, local ou scrapingbee) com base nas configurações da instância,
+        e opcionalmente adiciona um parâmetro de ano.
 
         Args:
-            base_url_name (str): O nome base da URL (ex: "url_producao", "url_comercializacao").
+            base_url_name (str): O nome base da URL (ex: "url_producao").
+            ano (str, optional): O ano a ser adicionado como parâmetro "&ano={ano}".
+                                 Se None, o parâmetro não é adicionado. Defaults to None.
         """
-        return (
+        chosen_url = (
             self.urls[f"{base_url_name}_mock"] if self.useMock
             else self.urls[base_url_name] if self.useLocal
             else self.urls[f"{base_url_name}_scrapingbee"]
         )
 
-    def scrape_producao(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_producao")
+        if ano:
+            # Verifica se a URL já tem parâmetros (se tem '?', usa '&', senão usa '?')
+            connector = '&' if '?' in chosen_url else '?'
+            return f"{chosen_url}{connector}ano={ano}"
+        return chosen_url
+
+    def scrape_producao(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_producao", ano)
         return self._scrape_tabela(url, 'producao', max_retries, retry_delay)
 
-    def scrape_processamento_viniferas(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_processamento_viniferas")
+    def scrape_processamento_viniferas(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_processamento_viniferas", ano)
         return self._scrape_tabela(url, 'processamento_viniferas', max_retries, retry_delay)
 
-    def scrape_processamento_americanas_hibridas(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_americanas_hibridas")
+    def scrape_processamento_americanas_hibridas(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_americanas_hibridas", ano)
         return self._scrape_tabela(url, 'processamento_americanas_hibridas', max_retries, retry_delay)
 
-    def scrape_processamento_uvas_de_mesa(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_uvas_de_mesa")
+    def scrape_processamento_uvas_de_mesa(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_uvas_de_mesa", ano)
         return self._scrape_tabela(url, 'processamento_uvas_de_mesa', max_retries, retry_delay)
 
-    def scrape_processamento_sem_classificacao(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_sem_classificacao")
+    def scrape_processamento_sem_classificacao(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_sem_classificacao", ano)
         return self._scrape_tabela(url, 'processamento_sem_classificacao', max_retries, retry_delay)
 
-    def scrape_comercializacao(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_comercializacao")
+    def scrape_comercializacao(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_comercializacao", ano)
         return self._scrape_tabela(url, 'comercializacao', max_retries, retry_delay)
 
-    def scrape_importacao_vinhos_de_mesa(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_importacao_vinhos_de_mesa")
+    def scrape_importacao_vinhos_de_mesa(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_importacao_vinhos_de_mesa", ano)
         return self._scrape_tabela_simples(url, 'importacao_vinhos_de_mesa', max_retries, retry_delay)
 
-    def scrape_importacao_espumantes(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_importacao_espumantes")
+    def scrape_importacao_espumantes(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_importacao_espumantes", ano)
         return self._scrape_tabela_simples(url, 'importacao_espumantes', max_retries, retry_delay)
 
-    def scrape_importacao_uvas_frescas(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_importacao_uvas_frescas")
+    def scrape_importacao_uvas_frescas(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_importacao_uvas_frescas", ano)
         return self._scrape_tabela_simples(url, 'importacao_uvas_frescas', max_retries, retry_delay)
 
-    def scrape_importacao_uvas_passas(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_importacao_uvas_passas")
+    def scrape_importacao_uvas_passas(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_importacao_uvas_passas", ano)
         return self._scrape_tabela_simples(url, 'importacao_uvas_passas', max_retries, retry_delay)
 
-    def scrape_importacao_suco_de_uva(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_importacao_suco_de_uva")
+    def scrape_importacao_suco_de_uva(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_importacao_suco_de_uva", ano)
         return self._scrape_tabela_simples(url, 'importacao_suco_de_uva', max_retries, retry_delay)
 
-    def scrape_exportacao_vinhos_de_mesa(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_exportacao_vinhos_de_mesa")
+    def scrape_exportacao_vinhos_de_mesa(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_exportacao_vinhos_de_mesa", ano)
         return self._scrape_tabela_simples(url, 'exportacao_vinhos_de_mesa', max_retries, retry_delay)
 
-    def scrape_exportacao_espumantes(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_exportacao_espumantes")
+    def scrape_exportacao_espumantes(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_exportacao_espumantes", ano)
         return self._scrape_tabela_simples(url, 'exportacao_espumantes', max_retries, retry_delay)
 
-    def scrape_exportacao_uvas_frescas(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_exportacao_uvas_frescas")
+    def scrape_exportacao_uvas_frescas(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_exportacao_uvas_frescas", ano)
         return self._scrape_tabela_simples(url, 'exportacao_uvas_frescas', max_retries, retry_delay)
 
-    def scrape_exportacao_suco_de_uva(self, max_retries=3, retry_delay=5):
-        url = self.get_url("url_exportacao_suco_de_uva")
+    def scrape_exportacao_suco_de_uva(self, max_retries=3, retry_delay=5, ano="2023"):
+        url = self.get_url("url_exportacao_suco_de_uva", ano)
         return self._scrape_tabela_simples(url, 'exportacao_suco_de_uva', max_retries, retry_delay)
 
 

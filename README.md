@@ -152,6 +152,45 @@ Para configurar e executar a API localmente, siga os passos abaixo:
 
 ---
 
+
+## Como Usar a Coleção Postman
+
+Para facilitar a interação com a API, fornecemos uma coleção do Postman que inclui todas as requisições e a configuração de autenticação.
+
+1.  **Importe a Coleção Postman:**
+    * Abra o Postman.
+    * No canto superior esquerdo, clique em **"Import"** (Importar).
+    * Selecione a opção **"Upload Files"** (Carregar Arquivos) e escolha o arquivo `Tech Challenge MLET API.postman_collection.json` que está na raiz do projeto.
+    * Clique em **"Import"**. A coleção aparecerá na sua barra lateral esquerda em "Collections".
+
+2.  **Configure a Variável de Ambiente `url_base`:**
+    A coleção utiliza uma variável de ambiente chamada `url_base` para definir a URL base da API (seja local ou em produção).
+
+    * No Postman, clique no ícone de **"olho"** (👁️) no canto superior direito, próximo ao dropdown de ambientes.
+    * Clique em **"Add"** (Adicionar) para criar um novo ambiente, ou selecione um ambiente existente e clique no ícone de engrenagem para editá-lo.
+    * Crie uma nova variável com o nome `url_base`.
+    * No campo **`INITIAL VALUE`** e **`CURRENT VALUE`**, insira a URL base da sua API:
+        * Para **Localhost**: `http://127.0.0.1:5000`
+        * Para **Heroku**: `http://pos-tech-ml-tech-challenge-api-47e455659f67.herokuapp.com` (ou o nome do seu app Heroku)
+    * Certifique-se de que este ambiente esteja **selecionado** no dropdown de ambientes do Postman.
+
+3.  **Realize o Login para Obter o Bearer Token:**
+    A requisição de login na coleção está configurada para automaticamente salvar o token JWT retornado em uma variável de ambiente chamada `bearer_token`.
+
+    * Na coleção importada, expanda a pasta e selecione a requisição **"Login"**.
+    * No corpo da requisição (`Body`), você verá um JSON com `username` e `password` (`admin` e `secret` por padrão).
+    * Clique em **"Send"** (Enviar).
+    * Após a resposta, o script na aba **"Post-response Script"** (Pós-resposta) será executado. Ele verificará se o login foi bem-sucedido e salvará o `token` retornado na variável de ambiente `bearer_token`. Você pode verificar isso clicando no ícone de "olho" (👁️) novamente e inspecionando o valor de `bearer_token`.
+
+4.  **Execute as Requisições de Web Scraping:**
+    Todas as outras requisições na coleção (Produção, Processamento, Importação, Exportação) estão configuradas para usar o `bearer_token` salvo.
+
+    * Selecione qualquer uma das requisições de web scraping (ex: "Web Scraping: Produção").
+    * Vá para a aba **"Authorization"** e você verá que o tipo **"Bearer Token"** está selecionado e o campo **"Token"** contém `{{bearer_token}}`.
+    * Clique em **"Send"**. A requisição será enviada com o token de autenticação.
+
+---
+
 ## Swagger
 
 Documentação em Swagger:

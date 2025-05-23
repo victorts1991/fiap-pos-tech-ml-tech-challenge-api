@@ -1,0 +1,495 @@
+{
+	"info": {
+		"_postman_id": "69bfba16-438f-4bb6-9462-36b4429287d2",
+		"name": "Tech Challenge MLET API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40176937"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Na aba \"Post-response Script\" (ou \"Pós-resposta\")",
+							"",
+							"// Parse a resposta JSON",
+							"var jsonData = pm.response.json();",
+							"",
+							"// Verifique se a resposta foi bem-sucedida (status 200) e se a propriedade \"token\" existe",
+							"if (pm.response.to.have.status(200) && jsonData.token) {",
+							"    // Define uma variável de ambiente chamada \"bearer_token\" com o valor do token",
+							"    pm.environment.set(\"bearer_token\", jsonData.token);",
+							"    console.log(\"Token salvo na variável de ambiente 'bearer_token': \" + pm.environment.get(\"bearer_token\"));",
+							"} else {",
+							"    console.log(\"Erro: Requisição falhou ou 'token' não encontrado na resposta.\");",
+							"    // Opcional: Para depuração, você pode logar a resposta completa se houver erro",
+							"    // console.log(pm.response.text());",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"secret\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url_base}}/login",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: Produção",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/producao/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"producao",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: processamento/viniferas",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/processamento/viniferas/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"processamento",
+						"viniferas",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: processamento/americanas_hibridas",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/processamento/americanas_hibridas/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"processamento",
+						"americanas_hibridas",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: processamento/uvas_de_mesa",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/processamento/uvas_de_mesa/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"processamento",
+						"uvas_de_mesa",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: processamento/sem_classificacao",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/processamento/sem_classificacao/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"processamento",
+						"sem_classificacao",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: comercializacao",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/comercializacao/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"comercializacao",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: importacao/vinhos_de_mesa",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/importacao/vinhos_de_mesa/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"importacao",
+						"vinhos_de_mesa",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: importacao/espumantes",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/importacao/espumantes/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"importacao",
+						"espumantes",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: importacao/uvas_frescas",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/importacao/uvas_frescas/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"importacao",
+						"uvas_frescas",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: importacao/uvas_passas",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/importacao/uvas_passas/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"importacao",
+						"uvas_passas",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: importacao/suco_de_uva",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/importacao/suco_de_uva/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"importacao",
+						"suco_de_uva",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: exportacao/vinhos_de_mesa",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/exportacao/vinhos_de_mesa/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"exportacao",
+						"vinhos_de_mesa",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: exportacao/espumantes",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/exportacao/espumantes/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"exportacao",
+						"espumantes",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: exportacao/uvas_frescas",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/exportacao/uvas_frescas/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"exportacao",
+						"uvas_frescas",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Web Scraping: exportacao/suco_de_uva",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{bearer_token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url_base}}/exportacao/suco_de_uva/2020",
+					"host": [
+						"{{url_base}}"
+					],
+					"path": [
+						"exportacao",
+						"suco_de_uva",
+						"2020"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

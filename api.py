@@ -110,9 +110,9 @@ def login():
         return jsonify({"error": "Credenciais inválidas"}), 401
 
 
-@app.route('/producao', methods=['GET'])
+@app.route('/producao/<ano>', methods=['GET'])
 @token_required
-def producao():
+def producao(ano):
     """
     Endpoint para obter dados de produção de uvas e derivados.
     ---
@@ -147,7 +147,7 @@ def producao():
     """
     try:
         scraper = VitibrasilScraper()
-        resultado_scraping = scraper.scrape_producao()
+        resultado_scraping = scraper.scrape_producao(ano)
 
         if resultado_scraping and resultado_scraping.get("dados"):
             return jsonify(resultado_scraping)
@@ -162,9 +162,9 @@ def producao():
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
 
 
-@app.route('/processamento/<categoria>', methods=['GET'])
+@app.route('/processamento/<categoria>/<ano>', methods=['GET'])
 @token_required
-def processamento(categoria):
+def processamento(categoria, ano):
     """
     Endpoint para obter dados de processamento de uvas por categoria.
     ---
@@ -219,13 +219,13 @@ def processamento(categoria):
         resultado_scraping = None
 
         if categoria == 'viniferas':
-            resultado_scraping = scraper.scrape_processamento_viniferas()
+            resultado_scraping = scraper.scrape_processamento_viniferas(ano)
         elif categoria == 'americanas_hibridas':
-            resultado_scraping = scraper.scrape_processamento_americanas_hibridas()
+            resultado_scraping = scraper.scrape_processamento_americanas_hibridas(ano)
         elif categoria == 'uvas_de_mesa':
-            resultado_scraping = scraper.scrape_processamento_uvas_de_mesa()
+            resultado_scraping = scraper.scrape_processamento_uvas_de_mesa(ano)
         elif categoria == 'sem_classificacao':
-            resultado_scraping = scraper.scrape_processamento_sem_classificacao()
+            resultado_scraping = scraper.scrape_processamento_sem_classificacao(ano)
         else:
             return jsonify({"error": "Categoria inválida"}), 400
 
@@ -242,9 +242,9 @@ def processamento(categoria):
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
 
 
-@app.route('/comercializacao', methods=['GET'])
+@app.route('/comercializacao/<ano>', methods=['GET'])
 @token_required
-def comercializacao():
+def comercializacao(ano):
     """
     Endpoint para obter dados de comercialização de derivados de uva.
     ---
@@ -279,7 +279,7 @@ def comercializacao():
     """
     try:
         scraper = VitibrasilScraper()
-        resultado_scraping = scraper.scrape_comercializacao()
+        resultado_scraping = scraper.scrape_comercializacao(ano)
 
         if resultado_scraping and resultado_scraping.get("dados"):
             return jsonify(resultado_scraping)
@@ -294,9 +294,9 @@ def comercializacao():
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
 
     
-@app.route('/importacao/<categoria>', methods=['GET'])
+@app.route('/importacao/<categoria>/<ano>', methods=['GET'])
 @token_required
-def importacao(categoria):
+def importacao(categoria, ano):
     """
     Endpoint para obter dados de importação por categoria.
     ---
@@ -350,15 +350,15 @@ def importacao(categoria):
         resultado_scraping = None
 
         if categoria == 'vinhos_de_mesa':
-            resultado_scraping = scraper.scrape_importacao_vinhos_de_mesa()
+            resultado_scraping = scraper.scrape_importacao_vinhos_de_mesa(ano)
         elif categoria == 'espumantes':
-            resultado_scraping = scraper.scrape_importacao_espumantes()
+            resultado_scraping = scraper.scrape_importacao_espumantes(ano)
         elif categoria == 'uvas_frescas':
-            resultado_scraping = scraper.scrape_importacao_uvas_frescas()
+            resultado_scraping = scraper.scrape_importacao_uvas_frescas(ano)
         elif categoria == 'uvas_passas':
-            resultado_scraping = scraper.scrape_importacao_uvas_passas()
+            resultado_scraping = scraper.scrape_importacao_uvas_passas(ano)
         elif categoria == 'suco_de_uva':
-            resultado_scraping = scraper.scrape_importacao_suco_de_uva()
+            resultado_scraping = scraper.scrape_importacao_suco_de_uva(ano)
         else:
             return jsonify({"error": "Categoria inválida"}), 400
 
@@ -375,9 +375,9 @@ def importacao(categoria):
         return jsonify({"erro": f"Erro inesperado: {str(e)}"}), 500
 
     
-@app.route('/exportacao/<categoria>', methods=['GET'])
+@app.route('/exportacao/<categoria>/<ano>', methods=['GET'])
 @token_required
-def exportacao(categoria):
+def exportacao(categoria, ano):
     """
     Endpoint para obter dados de exportação por categoria.
     ---
@@ -431,13 +431,13 @@ def exportacao(categoria):
         resultado_scraping = None
 
         if categoria == 'vinhos_de_mesa':
-            resultado_scraping = scraper.scrape_exportacao_vinhos_de_mesa()
+            resultado_scraping = scraper.scrape_exportacao_vinhos_de_mesa(ano)
         elif categoria == 'espumantes':
-            resultado_scraping = scraper.scrape_exportacao_espumantes()
+            resultado_scraping = scraper.scrape_exportacao_espumantes(ano)
         elif categoria == 'uvas_frescas':
-            resultado_scraping = scraper.scrape_exportacao_uvas_frescas()
+            resultado_scraping = scraper.scrape_exportacao_uvas_frescas(ano)
         elif categoria == 'suco_de_uva':
-            resultado_scraping = scraper.scrape_exportacao_suco_de_uva()
+            resultado_scraping = scraper.scrape_exportacao_suco_de_uva(ano)
         else:
             return jsonify({"error": "Categoria inválida"}), 400
 

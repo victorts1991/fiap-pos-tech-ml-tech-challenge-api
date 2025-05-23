@@ -163,8 +163,3 @@ http://127.0.0.1:5000/apidocs
 # Exemplo de como ficaria no Heroku, precisa necessariamente ser http para que o web scraping funcione
 http://pos-tech-ml-tech-challenge-api-47e455659f67.herokuapp.com/apidocs/
 ```
-
-
-TODO: 
-- Adicionar filtro de ano nos endpoints;
-- atualizar swaggers para que contemplem essas mudanças;

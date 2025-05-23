@@ -27,7 +27,9 @@ class VitibrasilScraper:
     # URLs
     # url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
     url_producao = f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY') }&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fopcao%3Dopt_02&render_js=false"
-    url_processamento_viniferas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03'
+    
+    # url_processamento_viniferas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03'
+    url_processamento_viniferas = f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY') }&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_03"
     url_americanas_hibridas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03'
     url_uvas_de_mesa = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03'
     url_sem_classificacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03'

@@ -23,26 +23,38 @@
     ```bash
     heroku buildpacks:set heroku/python -a pos-tech-ml-tech-challenge-api
     heroku buildpacks:add [https://github.com/heroku/heroku-buildpack-chrome-for-testing](https://github.com/heroku/heroku-buildpack-chrome-for-testing) -a pos-tech-ml-tech-challenge-api
-    heroku config:set WEB_CONCURRENCY=1
-    heroku config:set GUNICORN_TIMEOUT=60 
+    heroku config:set WEB_CONCURRENCY=1 -a pos-tech-ml-tech-challenge-api
+    heroku config:set GUNICORN_TIMEOUT=60 -a pos-tech-ml-tech-challenge-api
     ```
-6.  **Gere sua Chave de API do Heroku:**
+6.  **Configure a Chave de API do ScrapingBee no Heroku:**
+    Como o scraping no Heroku será feito via ScrapingBee, você precisa configurar sua chave de API como uma variável de ambiente.
+    a. **Obtenha sua API Key do ScrapingBee:**
+       * Acesse sua conta no [ScrapingBee](https://www.scrapingbee.com/).
+       * Vá para o seu `Dashboard` ou `API Settings`. Sua chave de API estará visível lá. Copie-a.
+    b. **Defina a variável de ambiente no Heroku:**
+       No seu terminal, execute (substitua `SUA_API_KEY_SCRAPINGBEE` pela sua chave real):
+       ```bash
+       heroku config:set SCRAPINGBEE_API_KEY="SUA_API_KEY_SCRAPINGBEE" -a pos-tech-ml-tech-challenge-api
+       ```
+7.  **Gere sua Chave de API do Heroku (para GitHub Actions):**
     * Acesse seu [Dashboard do Heroku](https://dashboard.heroku.com/).
     * Clique na sua foto de perfil (canto superior direito) e vá em **Account settings** (Configurações da conta).
     * Role a página até a seção **API Key** (Chave de API).
     * Clique em **Reveal** (Revelar) e **copie** a chave gerada.
-7.  **Configure os Secrets no GitHub Actions:**
-    Você precisará configurar dois Secrets no GitHub: um para a chave de API e outro para o seu e-mail do Heroku.
+8.  **Configure os Secrets no GitHub Actions:**
+    Você precisará configurar três Secrets no GitHub: um para a chave de API do Heroku, outro para o seu e-mail do Heroku e um terceiro para a chave de API do ScrapingBee.
     * No seu repositório do GitHub, vá em **Settings** (Configurações).
     * Clique em **Secrets and variables** > **Actions** (Segredos e variáveis > Ações).
-    * Clique em **New repository secret** (Novo segredo do repositório) e crie os dois secrets abaixo:
+    * Clique em **New repository secret** (Novo segredo do repositório) e crie os três secrets abaixo:
         * **Nome:** `HEROKU_API_KEY`
         * **Valor:** Cole a chave de API do Heroku que você copiou.
         * **Nome:** `HEROKU_EMAIL`
         * **Valor:** Digite o e-mail associado à sua conta Heroku.
+        * **Nome:** `SCRAPINGBEE_API_KEY`
+        * **Valor:** Cole a chave de API do ScrapingBee que você copiou.
     * Clique em **Add secret** para cada um.
-8.  **Faça um push para a branch `main`:**
-    Após configurar os secrets e ter o seu workflow do GitHub Actions atualizado para o Heroku, qualquer commit na branch `main` irá acionar o pipeline do GitHub Actions, que fará o deploy automático do projeto na plataforma Heroku.
+9.  **Faça um push para a branch `develop`:**
+    Após configurar os secrets e ter o seu workflow do GitHub Actions atualizado para o Heroku, qualquer commit na branch `develop` irá acionar o pipeline do GitHub Actions, que fará o deploy automático do projeto na plataforma Heroku.
 
 ---
 
@@ -80,9 +92,30 @@ Para configurar e executar a API localmente, siga os passos abaixo:
     pip install -r requirements.txt
     ```
 
-3.  **Configurar ChromeDriver (para Web Scraping):**
+3.  **Configurar Chave de API do ScrapingBee (para Ambiente Local):**
+    Para rodar a API localmente e testar o scraping, você precisará da chave de API do ScrapingBee configurada como uma variável de ambiente no seu sistema operacional.
 
-    Esta API utiliza Selenium para web scraping, que requer um navegador Chrome e seu respectivo ChromeDriver.
+    a. **Obtenha sua API Key do ScrapingBee:**
+       * Acesse sua conta no [ScrapingBee](https://www.scrapingbee.com/).
+       * Vá para o seu `Dashboard` ou `API Settings`. Sua chave de API estará visível lá. Copie-a.
+    b. **Defina a variável de ambiente no seu sistema operacional:**
+
+       **Para Unix/macOS (Terminal):**
+       ```bash
+       export SCRAPINGBEE_API_KEY="SUA_API_KEY_SCRAPINGBEE"
+       # Para persistir entre sessões do terminal, adicione esta linha ao seu ~/.bashrc, ~/.zshrc ou ~/.profile
+       ```
+
+       **Para Windows (CMD):**
+       ```cmd
+       set SCRAPINGBEE_API_KEY="SUA_API_KEY_SCRAPINGBEE"
+       # Para persistir entre sessões, você precisará configurá-la através das Propriedades do Sistema > Variáveis de Ambiente.
+       ```
+       (Substitua `SUA_API_KEY_SCRAPINGBEE` pela sua chave real).
+
+4.  **Configurar ChromeDriver (para Web Scraping):**
+
+    Esta API utiliza Selenium para web scraping local, que requer um navegador Chrome e seu respectivo ChromeDriver.
 
     a. **Verifique a versão do seu Google Chrome:**
        Abra o Google Chrome, vá em `Chrome` (no menu superior) > `Sobre o Google Chrome` e anote a versão exata (ex: `125.0.6422.141`).
@@ -107,9 +140,9 @@ Para configurar e executar a API localmente, siga os passos abaixo:
     e. **Permissão de Segurança do macOS (se aplicável):**
        Na primeira vez que você tentar executar o scraper localmente, o macOS pode bloquear o `chromedriver`. Se isso acontecer, vá em `Ajustes do Sistema` (ou `Preferências do Sistema`) > `Privacidade e Segurança` e clique em `Abrir Mesmo Assim` ao lado da mensagem sobre o `chromedriver`.
 
-4.  **Execute a API:**
+5.  **Execute a API:**
 
-    Com o ambiente virtual ativado e o ChromeDriver configurado, inicie a aplicação:
+    Com o ambiente virtual ativado, a chave do ScrapingBee e o ChromeDriver configurados, inicie a aplicação:
 
     ```bash
     python3 api.py
@@ -135,7 +168,6 @@ https://pos-tech-ml-tech-challenge-api-47e455659f67.herokuapp.com/apidocs/
 TODO: 
 
 - Alterar as urls para o https://app.scrapingbee.com/dashboard
-- Colocar a chave de api como variavel de ambiente do Github Actions
 - Adicionar ano nos endpoints
 
 

@@ -118,6 +118,13 @@ def producao(ano):
     ---
     tags:
       - Produção
+    parameters:
+      - name: ano
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Ano de referência para os dados de produção (ex: "2023").
     security:
       - Bearer: []
     responses:
@@ -178,6 +185,12 @@ def processamento(categoria, ano):
           type: string
           enum: [viniferas, americanas_hibridas, uvas_de_mesa, sem_classificacao]
         description: Categoria de processamento a ser consultada.
+      - name: ano
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Ano de referência para os dados de processamento (ex: "2023").
     security:
       - Bearer: []
     responses:
@@ -250,6 +263,13 @@ def comercializacao(ano):
     ---
     tags:
       - Comercialização
+    parameters:
+      - name: ano
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Ano de referência para os dados de comercialização (ex: "2023").
     security:
       - Bearer: []
     responses:
@@ -309,7 +329,13 @@ def importacao(categoria, ano):
         schema:
           type: string
           enum: [vinhos_de_mesa, espumantes, uvas_frescas, uvas_passas, suco_de_uva]
-        description: Categoria dos produtos importados
+        description: Categoria dos produtos importados.
+      - name: ano
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Ano de referência para os dados de importação (ex: "2023").
     security:
       - Bearer: []
     responses:
@@ -390,7 +416,13 @@ def exportacao(categoria, ano):
         schema:
           type: string
           enum: [vinhos_de_mesa, espumantes, uvas_frescas, suco_de_uva]
-        description: Categoria dos produtos exportados
+        description: Categoria dos produtos exportados.
+      - name: ano
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Ano de referência para os dados de exportação (ex: "2023").
     security:
       - Bearer: []
     responses:

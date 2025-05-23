@@ -166,6 +166,5 @@ http://pos-tech-ml-tech-challenge-api-47e455659f67.herokuapp.com/apidocs/
 
 
 TODO: 
-
-- Alterar as urls para o https://app.scrapingbee.com/dashboard e metodos que as chamam para que fiquem iguais ao de producao;
 - Adicionar filtro de ano nos endpoints;
+- atualizar swaggers para que contemplem essas mudanças;

@@ -25,57 +25,58 @@ class VitibrasilScraper:
     CHROMEDRIVER_PATH_LOCAL = "/Users/mac/Downloads/chromedriver-mac-x64/chromedriver" 
     CHROME_BINARY_PATH_LOCAL = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" 
 
-    # URLs
-    url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
-    url_processamento_viniferas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03'
-    url_americanas_hibridas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03'
-    url_uvas_de_mesa = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03'
-    url_sem_classificacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03'
-    url_comercializacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04'
-    url_importacao_vinhos_de_mesa = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_05"
-    url_importacao_espumantes = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_05"
-    url_importacao_uvas_frescas = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_05"
-    url_importacao_uvas_passas = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_05"
-    url_importacao_suco_de_uva = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_05&opcao=opt_05"
-    url_exportacao_vinhos_de_mesa = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_06"
-    url_exportacao_espumantes = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_06"
-    url_exportacao_uvas_frescas = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_06"
-    url_exportacao_suco_de_uva = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_06"
+    urls = {
+        # URLs originais
+        "url_producao": 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02',
+        "url_processamento_viniferas": 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03',
+        "url_americanas_hibridas": 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03',
+        "url_uvas_de_mesa": 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03',
+        "url_sem_classificacao": 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03',
+        "url_comercializacao": 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04',
+        "url_importacao_vinhos_de_mesa": "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_05",
+        "url_importacao_espumantes": "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_05",
+        "url_importacao_uvas_frescas": "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_05",
+        "url_importacao_uvas_passas": "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_05",
+        "url_importacao_suco_de_uva": "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_05&opcao=opt_05",
+        "url_exportacao_vinhos_de_mesa": "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_06",
+        "url_exportacao_espumantes": "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_06",
+        "url_exportacao_uvas_frescas": "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_06",
+        "url_exportacao_suco_de_uva": "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_06",
 
-    # URLs ScrapingBee
-    url_producao_scrapingbee = f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY') }&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fopcao%3Dopt_02&render_js=false"
-    url_processamento_viniferas_scrapingbee = f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY') }&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_03"
-    
-    url_americanas_hibridas_scrapingbee = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03'
-    url_uvas_de_mesa_scrapingbee = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03'
-    url_sem_classificacao_scrapingbee = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03'
-    url_comercializacao_scrapingbee = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04'
-    url_importacao_vinhos_de_mesa_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_05"
-    url_importacao_espumantes_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_05"
-    url_importacao_uvas_frescas_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_05"
-    url_importacao_uvas_passas_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_05"
-    url_importacao_suco_de_uva_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_05&opcao=opt_05"
-    url_exportacao_vinhos_de_mesa_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_06"
-    url_exportacao_espumantes_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_06"
-    url_exportacao_uvas_frescas_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_06"
-    url_exportacao_suco_de_uva_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_06"
+        # URLs ScrapingBee
+        "url_producao_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fopcao%3Dopt_02&render_js=false",
+        "url_processamento_viniferas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_03",
+        "url_americanas_hibridas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_02%26opcao%3Dopt_03",
+        "url_uvas_de_mesa_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_03%26opcao%3Dopt_03",
+        "url_sem_classificacao_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_04%26opcao%3Dopt_03",
+        "url_comercializacao_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fopcao%3Dopt_04",
+        "url_importacao_vinhos_de_mesa_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_05",
+        "url_importacao_espumantes_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_02%26opcao%3Dopt_05",
+        "url_importacao_uvas_frescas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_03%26opcao%3Dopt_05",
+        "url_importacao_uvas_passas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_04%26opcao%3Dopt_05",
+        "url_importacao_suco_de_uva_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_05%26opcao%3Dopt_05",
+        "url_exportacao_vinhos_de_mesa_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_06",
+        "url_exportacao_espumantes_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_02%26opcao%3Dopt_06",
+        "url_exportacao_uvas_frescas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_03%26opcao%3Dopt_06",
+        "url_exportacao_suco_de_uva_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_04%26opcao%3Dopt_06",
 
-    # URL's Mock
-    url_producao_mock = f"{url_base_for_mocks}producao.html"
-    url_processamento_viniferas_mock = f"{url_base_for_mocks}processamento_viniferas.html"
-    url_americanas_hibridas_mock = f"{url_base_for_mocks}processamento_americanas_hibridas.html"
-    url_uvas_de_mesa_mock = f"{url_base_for_mocks}processamento_uvas_de_mesa.html"
-    url_sem_classificacao_mock = f"{url_base_for_mocks}processamento_sem_classificacao.html"
-    url_comercializacao_mock = f"{url_base_for_mocks}comercializacao.html"
-    url_importacao_vinhos_de_mesa_mock = f"{url_base_for_mocks}importacao_vinhos_de_mesa.html"
-    url_importacao_espumantes_mock = f"{url_base_for_mocks}importacao_espumantes.html"
-    url_importacao_uvas_frescas_mock = f"{url_base_for_mocks}importacao_uvas_frescas.html"
-    url_importacao_uvas_passas_mock = f"{url_base_for_mocks}importacao_uvas_passas.html"
-    url_importacao_suco_de_uva_mock = f"{url_base_for_mocks}importacao_suco_de_uva.html"
-    url_exportacao_vinhos_de_mesa_mock = f"{url_base_for_mocks}exportacao_vinhos_de_mesa.html"
-    url_exportacao_espumantes_mock = f"{url_base_for_mocks}exportacao_espumantes.html"
-    url_exportacao_uvas_frescas_mock = f"{url_base_for_mocks}exportacao_uvas_frescas.html"
-    url_exportacao_suco_de_uva_mock = f"{url_base_for_mocks}exportacao_suco_de_uva.html"
+        # URLs Mock
+        "url_producao_mock": f"{url_base_for_mocks}producao.html",
+        "url_processamento_viniferas_mock": f"{url_base_for_mocks}processamento_viniferas.html",
+        "url_americanas_hibridas_mock": f"{url_base_for_mocks}processamento_americanas_hibridas.html",
+        "url_uvas_de_mesa_mock": f"{url_base_for_mocks}processamento_uvas_de_mesa.html",
+        "url_sem_classificacao_mock": f"{url_base_for_mocks}processamento_sem_classificacao.html",
+        "url_comercializacao_mock": f"{url_base_for_mocks}comercializacao.html",
+        "url_importacao_vinhos_de_mesa_mock": f"{url_base_for_mocks}importacao_vinhos_de_mesa.html",
+        "url_importacao_espumantes_mock": f"{url_base_for_mocks}importacao_espumantes.html",
+        "url_importacao_uvas_frescas_mock": f"{url_base_for_mocks}importacao_uvas_frescas.html",
+        "url_importacao_uvas_passas_mock": f"{url_base_for_mocks}importacao_uvas_passas.html",
+        "url_importacao_suco_de_uva_mock": f"{url_base_for_mocks}importacao_suco_de_uva.html",
+        "url_exportacao_vinhos_de_mesa_mock": f"{url_base_for_mocks}exportacao_vinhos_de_mesa.html",
+        "url_exportacao_espumantes_mock": f"{url_base_for_mocks}exportacao_espumantes.html",
+        "url_exportacao_uvas_frescas_mock": f"{url_base_for_mocks}exportacao_uvas_frescas.html",
+        "url_exportacao_suco_de_uva_mock": f"{url_base_for_mocks}exportacao_suco_de_uva.html"
+    }
 
 
     def __init__(self):
@@ -132,72 +133,77 @@ class VitibrasilScraper:
             except WebDriverException as e:
                 print(f"Aviso: Erro ao fechar o WebDriver: {e}")
 
+    def get_url(self, base_url_name):
+        """
+        Retorna a URL apropriada (mock, local ou scrapingbee) com base nas configurações da instância.
+
+        Args:
+            base_url_name (str): O nome base da URL (ex: "url_producao", "url_comercializacao").
+        """
+        return (
+            self.urls[f"{base_url_name}_mock"] if self.useMock
+            else self.urls[base_url_name] if self.useLocal
+            else self.urls[f"{base_url_name}_scrapingbee"]
+        )
 
     def scrape_producao(self, max_retries=3, retry_delay=5):
-        
-        if self.useMock:
-            url = self.url_producao_mock 
-        elif self.useLocal:
-            url = self.url_producao
-        else:
-            url = self.url_producao_scrapingbee
-
+        url = self.get_url("url_producao")
         return self._scrape_tabela(url, 'producao', max_retries, retry_delay)
 
     def scrape_processamento_viniferas(self, max_retries=3, retry_delay=5):
-        url = self.url_processamento_viniferas_mock if self.useMock else self.url_processamento_viniferas
+        url = self.get_url("url_processamento_viniferas")
         return self._scrape_tabela(url, 'processamento_viniferas', max_retries, retry_delay)
 
     def scrape_processamento_americanas_hibridas(self, max_retries=3, retry_delay=5):
-        url = self.url_americanas_hibridas_mock if self.useMock else self.url_americanas_hibridas
+        url = self.get_url("url_americanas_hibridas")
         return self._scrape_tabela(url, 'processamento_americanas_hibridas', max_retries, retry_delay)
 
     def scrape_processamento_uvas_de_mesa(self, max_retries=3, retry_delay=5):
-        url = self.url_uvas_de_mesa_mock if self.useMock else self.url_uvas_de_mesa
+        url = self.get_url("url_uvas_de_mesa")
         return self._scrape_tabela(url, 'processamento_uvas_de_mesa', max_retries, retry_delay)
 
     def scrape_processamento_sem_classificacao(self, max_retries=3, retry_delay=5):
-        url = self.url_sem_classificacao_mock if self.useMock else self.url_sem_classificacao
+        url = self.get_url("url_sem_classificacao")
         return self._scrape_tabela(url, 'processamento_sem_classificacao', max_retries, retry_delay)
-    
+
     def scrape_comercializacao(self, max_retries=3, retry_delay=5):
-        url = self.url_comercializacao_mock if self.useMock else self.url_comercializacao
+        url = self.get_url("url_comercializacao")
         return self._scrape_tabela(url, 'comercializacao', max_retries, retry_delay)
 
     def scrape_importacao_vinhos_de_mesa(self, max_retries=3, retry_delay=5):
-        url = self.url_importacao_vinhos_de_mesa_mock if self.useMock else self.url_importacao_vinhos_de_mesa
+        url = self.get_url("url_importacao_vinhos_de_mesa")
         return self._scrape_tabela_simples(url, 'importacao_vinhos_de_mesa', max_retries, retry_delay)
-    
+
     def scrape_importacao_espumantes(self, max_retries=3, retry_delay=5):
-        url = self.url_importacao_espumantes_mock if self.useMock else self.url_importacao_espumantes
+        url = self.get_url("url_importacao_espumantes")
         return self._scrape_tabela_simples(url, 'importacao_espumantes', max_retries, retry_delay)
 
     def scrape_importacao_uvas_frescas(self, max_retries=3, retry_delay=5):
-        url = self.url_importacao_uvas_frescas_mock if self.useMock else self.url_importacao_uvas_frescas
+        url = self.get_url("url_importacao_uvas_frescas")
         return self._scrape_tabela_simples(url, 'importacao_uvas_frescas', max_retries, retry_delay)
 
     def scrape_importacao_uvas_passas(self, max_retries=3, retry_delay=5):
-        url = self.url_importacao_uvas_passas_mock if self.useMock else self.url_importacao_uvas_passas
+        url = self.get_url("url_importacao_uvas_passas")
         return self._scrape_tabela_simples(url, 'importacao_uvas_passas', max_retries, retry_delay)
 
     def scrape_importacao_suco_de_uva(self, max_retries=3, retry_delay=5):
-        url = self.url_importacao_suco_de_uva_mock if self.useMock else self.url_importacao_suco_de_uva
+        url = self.get_url("url_importacao_suco_de_uva")
         return self._scrape_tabela_simples(url, 'importacao_suco_de_uva', max_retries, retry_delay)
 
     def scrape_exportacao_vinhos_de_mesa(self, max_retries=3, retry_delay=5):
-        url = self.url_exportacao_vinhos_de_mesa_mock if self.useMock else self.url_exportacao_vinhos_de_mesa
+        url = self.get_url("url_exportacao_vinhos_de_mesa")
         return self._scrape_tabela_simples(url, 'exportacao_vinhos_de_mesa', max_retries, retry_delay)
 
     def scrape_exportacao_espumantes(self, max_retries=3, retry_delay=5):
-        url = self.url_exportacao_espumantes_mock if self.useMock else self.url_exportacao_espumantes
+        url = self.get_url("url_exportacao_espumantes")
         return self._scrape_tabela_simples(url, 'exportacao_espumantes', max_retries, retry_delay)
 
     def scrape_exportacao_uvas_frescas(self, max_retries=3, retry_delay=5):
-        url = self.url_exportacao_uvas_frescas_mock if self.useMock else self.url_exportacao_uvas_frescas
+        url = self.get_url("url_exportacao_uvas_frescas")
         return self._scrape_tabela_simples(url, 'exportacao_uvas_frescas', max_retries, retry_delay)
 
     def scrape_exportacao_suco_de_uva(self, max_retries=3, retry_delay=5):
-        url = self.url_exportacao_suco_de_uva_mock if self.useMock else self.url_exportacao_suco_de_uva
+        url = self.get_url("url_exportacao_suco_de_uva")
         return self._scrape_tabela_simples(url, 'exportacao_suco_de_uva', max_retries, retry_delay)
 
 

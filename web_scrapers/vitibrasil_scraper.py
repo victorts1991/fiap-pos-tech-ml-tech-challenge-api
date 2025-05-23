@@ -17,6 +17,9 @@ class VitibrasilScraper:
     url_base_for_mocks = "C:/FIAP/Tech Challenge/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
     # url_base_for_mocks = "file:///Users/mac/Desktop/dev/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
 
+    CHROMEDRIVER_PATH_LOCAL = "/Users/mac/Downloads/chromedriver-mac-x64/chromedriver" 
+    CHROME_BINARY_PATH_LOCAL = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" 
+
     # URLs
     url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
     url_processamento_viniferas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03'
@@ -61,33 +64,38 @@ class VitibrasilScraper:
         chrome_options.add_argument('--window-size=1920x1080')
         chrome_options.add_argument('--user-agent=Mozilla/5.0')
 
-        # **** CAMINHOS EXATOS ENCONTRADOS NO HEROKU ****
-        # Chrome Binary (o navegador real)
-        CHROME_BINARY_PATH = "/app/.chrome-for-testing/chrome-linux64/chrome"
-        # ChromeDriver Binary (o driver que controla o navegador)
-        CHROMEDRIVER_PATH = "/app/.chrome-for-testing/chromedriver-linux64/chromedriver"
+        # --- Lógica para alternar entre ambiente local e Heroku ---
+        is_heroku = os.environ.get('DYNO') is not None 
+
+        if is_heroku:
+            # **** CAMINHOS EXATOS ENCONTRADOS NO HEROKU ****
+            CHROME_BINARY_PATH = "/app/.chrome-for-testing/chrome-linux64/chrome"
+            CHROMEDRIVER_PATH = "/app/.chrome-for-testing/chromedriver-linux64/chromedriver"
+            print("Rodando no Heroku: Usando caminhos de buildpack.")
+        else:
+            # **** CAMINHOS PARA AMBIENTE LOCAL ****
+            
+            CHROMEDRIVER_PATH = self.CHROMEDRIVER_PATH_LOCAL 
+            CHROME_BINARY_PATH = self.CHROME_BINARY_PATH_LOCAL
+
+            print(f"Rodando localmente: Usando chromedriver de {CHROMEDRIVER_PATH}")
+            # Verifica se os binários existem e são acessíveis (para depuração local)
+            if not os.path.exists(CHROME_BINARY_PATH):
+                print(f"AVISO: Chrome binário não encontrado localmente em: {CHROME_BINARY_PATH}. Isso pode causar problemas se você não tiver o Chrome instalado ou o caminho estiver incorreto.")
+            if not os.path.exists(CHROMEDRIVER_PATH):
+                raise ScrapingError(f"ChromeDriver não encontrado localmente em: {CHROMEDRIVER_PATH}. Baixe a versão correta para o seu Chrome e coloque-o aqui.")
 
         # Define o caminho do binário do Chrome para as opções do Selenium
         chrome_options.binary_location = CHROME_BINARY_PATH
 
-        # Verifica se os binários existem e são acessíveis (para depuração)
-        if not os.path.exists(CHROME_BINARY_PATH):
-            raise ScrapingError(f"Chrome binário não encontrado em: {CHROME_BINARY_PATH}. Verifique o buildpack e o caminho.")
-        if not os.path.exists(CHROMEDRIVER_PATH):
-            raise ScrapingError(f"ChromeDriver não encontrado em: {CHROMEDRIVER_PATH}. Verifique o buildpack e o caminho.")
-        
-        # Garante que o ChromeDriver tenha permissão de execução
-        # O buildpack já deve cuidar disso, mas é uma boa prática garantir
-        os.chmod(CHROMEDRIVER_PATH, 0o755)
+        if os.path.exists(CHROMEDRIVER_PATH) and not os.access(CHROMEDRIVER_PATH, os.X_OK):
+             os.chmod(CHROMEDRIVER_PATH, 0o755)
 
-        # Cria o serviço do ChromeDriver com o caminho exato
         service = Service(executable_path=CHROMEDRIVER_PATH)
 
-        # Inicializa o driver do Selenium
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
-        
+
     def __del__(self):
-        # Garante que o driver seja fechado ao final para liberar recursos
         if hasattr(self, 'driver'):
             self.driver.quit()
 

@@ -18,6 +18,7 @@ class VitibrasilScraper:
 
     # Configuracao para os Mocks
     useMock = False
+    useLocal = False
     url_base_for_mocks = "C:/FIAP/Tech Challenge/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
     # url_base_for_mocks = "file:///Users/mac/Desktop/dev/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
 
@@ -25,11 +26,8 @@ class VitibrasilScraper:
     CHROME_BINARY_PATH_LOCAL = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" 
 
     # URLs
-    # url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
-    url_producao = f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY') }&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fopcao%3Dopt_02&render_js=false"
-    
-    # url_processamento_viniferas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03'
-    url_processamento_viniferas = f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY') }&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_03"
+    url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
+    url_processamento_viniferas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03'
     url_americanas_hibridas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03'
     url_uvas_de_mesa = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03'
     url_sem_classificacao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03'
@@ -43,6 +41,24 @@ class VitibrasilScraper:
     url_exportacao_espumantes = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_06"
     url_exportacao_uvas_frescas = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_06"
     url_exportacao_suco_de_uva = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_06"
+
+    # URLs ScrapingBee
+    url_producao_scrapingbee = f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY') }&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fopcao%3Dopt_02&render_js=false"
+    url_processamento_viniferas_scrapingbee = f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY') }&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_03"
+    
+    url_americanas_hibridas_scrapingbee = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03'
+    url_uvas_de_mesa_scrapingbee = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03'
+    url_sem_classificacao_scrapingbee = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_03'
+    url_comercializacao_scrapingbee = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_04'
+    url_importacao_vinhos_de_mesa_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_05"
+    url_importacao_espumantes_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_05"
+    url_importacao_uvas_frescas_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_05"
+    url_importacao_uvas_passas_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_05"
+    url_importacao_suco_de_uva_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_05&opcao=opt_05"
+    url_exportacao_vinhos_de_mesa_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_06"
+    url_exportacao_espumantes_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_06"
+    url_exportacao_uvas_frescas_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_06"
+    url_exportacao_suco_de_uva_scrapingbee = "http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_04&opcao=opt_06"
 
     # URL's Mock
     url_producao_mock = f"{url_base_for_mocks}producao.html"
@@ -73,11 +89,6 @@ class VitibrasilScraper:
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument('--window-size=1920x1080')
         chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36')
-
-        
-        # Opcional: Adicionar log de console do navegador para depuração
-        # chrome_options.add_argument('--enable-logging')
-        # chrome_options.add_argument('--v=1') # Verbose logging
 
         # --- Lógica para alternar entre ambiente local e Heroku ---
         is_heroku = os.environ.get('DYNO') is not None 
@@ -115,7 +126,7 @@ class VitibrasilScraper:
 
     def __del__(self):
         # Garante que o driver seja fechado ao final para liberar recursos
-        if hasattr(self, 'driver') and self.driver: # Verifica se driver existe e não é None
+        if hasattr(self, 'driver') and self.driver: 
             try:
                 self.driver.quit()
             except WebDriverException as e:
@@ -123,7 +134,14 @@ class VitibrasilScraper:
 
 
     def scrape_producao(self, max_retries=3, retry_delay=5):
-        url = self.url_producao_mock if self.useMock else self.url_producao
+        
+        if self.useMock:
+            url = self.url_producao_mock 
+        elif self.useLocal:
+            url = self.url_producao
+        else:
+            url = self.url_producao_scrapingbee
+
         return self._scrape_tabela(url, 'producao', max_retries, retry_delay)
 
     def scrape_processamento_viniferas(self, max_retries=3, retry_delay=5):
@@ -242,27 +260,27 @@ class VitibrasilScraper:
                     raise ScrapingError(f"Tabela 'tb_dados' não encontrada após espera na URL: {url}") 
             
             except TimeoutException as e: 
+
                 print(f"Tempo limite excedido ao esperar pela tabela em {url} na tentativa {attempt + 1}: {e}")
-                # --- Bloco de depuração no erro ---
                 try:
                     page_html_on_error = self.driver.page_source
                     print(f"HTML da página no momento do Timeout (primeiras 1000 chars):\n{page_html_on_error[:1000]}...")
                 except WebDriverException as capture_e:
                     print(f"Falha ao capturar HTML no erro de Timeout: {capture_e}")
-                # --- Fim do bloco de depuração ---
+
                 time.sleep(retry_delay)
                 if attempt == max_retries - 1: # Se for a última tentativa, re-raise o erro para o chamador
                     raise ScrapingError(f"Tempo limite excedido após {max_retries} tentativas na URL: {url}") from e
             
             except Exception as e:
                 print(f"Erro inesperado ao processar URL {url} na tentativa {attempt + 1}: {e}")
-                # --- Bloco de depuração no erro ---
+                
                 try:
                     page_html_on_error = self.driver.page_source
                     print(f"HTML da página no momento do erro inesperado (primeiras 1000 chars):\n{page_html_on_error[:1000]}...")
                 except WebDriverException as capture_e:
                     print(f"Falha ao capturar HTML no erro inesperado: {capture_e}")
-                # --- Fim do bloco de depuração ---
+                
                 time.sleep(retry_delay)
                 if attempt == max_retries - 1: # Se for a última tentativa, re-raise o erro para o chamador
                     raise ScrapingError(f"Erro inesperado após {max_retries} tentativas na URL: {url}") from e

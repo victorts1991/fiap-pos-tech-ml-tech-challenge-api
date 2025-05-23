@@ -46,19 +46,74 @@
 
 ## Deploy em Localhost
 
-1.  Após executar o `git clone`, execute os comandos abaixo na raiz do projeto:
+Para configurar e executar a API localmente, siga os passos abaixo:
+
+1.  **Clone o repositório:**
+
+    ```bash
+    git clone [https://github.com/victorts1991/fiap-pos-tech-ml-tech-challenge-api.git](https://github.com/victorts1991/fiap-pos-tech-ml-tech-challenge-api.git)
+    cd fiap-pos-tech-ml-tech-challenge-api
+    ```
+
+2.  **Configurar Ambiente Python:**
+
+    a. **Crie e ative um ambiente virtual:**
 
     ```bash
     python3 -m venv venv
 
-    source venv/bin/activate  # Unix/macOS
-    # ou
-    venv\Scripts\activate  # Windows
+    # Para Unix/macOS:
+    source venv/bin/activate
 
+    # Para Windows (CMD):
+    # venv\Scripts\activate.bat
+
+    # Para Windows (PowerShell):
+    # venv\Scripts\Activate.ps1
+    ```
+
+    b. **Instale as dependências Python:**
+
+    ```bash
     pip install -r requirements.txt
+    ```
 
+3.  **Configurar ChromeDriver (para Web Scraping):**
+
+    Esta API utiliza Selenium para web scraping, que requer um navegador Chrome e seu respectivo ChromeDriver.
+
+    a. **Verifique a versão do seu Google Chrome:**
+       Abra o Google Chrome, vá em `Chrome` (no menu superior) > `Sobre o Google Chrome` e anote a versão exata (ex: `125.0.6422.141`).
+
+    b. **Baixe o ChromeDriver compatível:**
+       Acesse o site [Chrome for Testing](https://googlechromelabs.github.io/chrome-for-testing/) e, na coluna `ChromeDriver`, baixe o `.zip` da versão que corresponde à do seu Chrome e à arquitetura do seu Mac (`mac-arm64` para Apple Silicon ou `mac-x64` para Intel).
+
+    c. **Descompacte e coloque o ChromeDriver:**
+       Após descompactar o arquivo `.zip` baixado, você encontrará o executável `chromedriver` dentro de uma pasta (ex: `chromedriver-mac-x64`). **Copie este executável `chromedriver`** para o local que você definiu na variável `CHROMEDRIVER_PATH_LOCAL` em `web_scrapers/vitibrasil_scraper.py`.
+
+       **Com base no código atual, o caminho esperado é:** `/Users/mac/Downloads/chromedriver-mac-x64/`
+       **Certifique-se de que o executável `chromedriver` esteja diretamente dentro dessa pasta.**
+
+    d. **Conceda permissão de execução:**
+       Abra o Terminal, navegue até a pasta onde você colocou o `chromedriver` e execute:
+
+       ```bash
+       chmod +x /Users/mac/Downloads/chromedriver-mac-x64/chromedriver
+       ```
+       (Ajuste o caminho se você decidir colocar o `chromedriver` em outro local no futuro).
+
+    e. **Permissão de Segurança do macOS (se aplicável):**
+       Na primeira vez que você tentar executar o scraper localmente, o macOS pode bloquear o `chromedriver`. Se isso acontecer, vá em `Ajustes do Sistema` (ou `Preferências do Sistema`) > `Privacidade e Segurança` e clique em `Abrir Mesmo Assim` ao lado da mensagem sobre o `chromedriver`.
+
+4.  **Execute a API:**
+
+    Com o ambiente virtual ativado e o ChromeDriver configurado, inicie a aplicação:
+
+    ```bash
     python3 api.py
     ```
+
+    A API estará disponível em `http://127.0.0.1:5000`. Você pode acessar a documentação Swagger em `http://127.0.0.1:5000/apidocs`.
 
 ---
 

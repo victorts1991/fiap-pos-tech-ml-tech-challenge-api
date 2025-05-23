@@ -130,3 +130,11 @@ http://127.0.0.1:5000/apidocs
 # Exemplo de como ficaria no Heroku
 https://pos-tech-ml-tech-challenge-api-47e455659f67.herokuapp.com/apidocs/
 ```
+
+
+TODO: 
+
+- Alterar as urls para o https://app.scrapingbee.com/dashboard
+- Colocar a chave de api como variavel de ambiente do Github Actions
+- Alterar as urls de scraper
+- Adicionar ano nos endpoints

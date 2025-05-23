@@ -23,6 +23,8 @@
     ```bash
     heroku buildpacks:set heroku/python -a pos-tech-ml-tech-challenge-api
     heroku buildpacks:add [https://github.com/heroku/heroku-buildpack-chrome-for-testing](https://github.com/heroku/heroku-buildpack-chrome-for-testing) -a pos-tech-ml-tech-challenge-api
+    heroku config:set WEB_CONCURRENCY=1
+    heroku config:set GUNICORN_TIMEOUT=60 
     ```
 6.  **Gere sua Chave de API do Heroku:**
     * Acesse seu [Dashboard do Heroku](https://dashboard.heroku.com/).

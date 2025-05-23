@@ -25,7 +25,8 @@ class VitibrasilScraper:
     CHROME_BINARY_PATH_LOCAL = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" 
 
     # URLs
-    url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
+    # url_producao = 'http://vitibrasil.cnpuv.embrapa.br/index.php?opcao=opt_02'
+    url_producao = 'https://app.scrapingbee.com/api/v1?api_key=VSBAJ770FRYITIXB7UI0UGXJ6YHON2YFATX5U28C6SKG3KV5UFPNFMGIQ3Q9XG9ORSBZW45VO5FG2HRO&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fopcao%3Dopt_02&render_js=false'
     url_processamento_viniferas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_01&opcao=opt_03'
     url_americanas_hibridas = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_02&opcao=opt_03'
     url_uvas_de_mesa = 'http://vitibrasil.cnpuv.embrapa.br/index.php?subopcao=subopt_03&opcao=opt_03'

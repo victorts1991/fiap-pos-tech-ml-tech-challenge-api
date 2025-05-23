@@ -36,12 +36,7 @@
        ```bash
        heroku config:set SCRAPINGBEE_API_KEY="SUA_API_KEY_SCRAPINGBEE" -a pos-tech-ml-tech-challenge-api
        ```
-7.  **Gere sua Chave de API do Heroku (para GitHub Actions):**
-    * Acesse seu [Dashboard do Heroku](https://dashboard.heroku.com/).
-    * Clique na sua foto de perfil (canto superior direito) e vá em **Account settings** (Configurações da conta).
-    * Role a página até a seção **API Key** (Chave de API).
-    * Clique em **Reveal** (Revelar) e **copie** a chave gerada.
-8.  **Configure os Secrets no GitHub Actions:**
+7.  **Configure os Secrets no GitHub Actions:**
     Você precisará configurar três Secrets no GitHub: um para a chave de API do Heroku, outro para o seu e-mail do Heroku e um terceiro para a chave de API do ScrapingBee.
     * No seu repositório do GitHub, vá em **Settings** (Configurações).
     * Clique em **Secrets and variables** > **Actions** (Segredos e variáveis > Ações).
@@ -50,11 +45,9 @@
         * **Valor:** Cole a chave de API do Heroku que você copiou.
         * **Nome:** `HEROKU_EMAIL`
         * **Valor:** Digite o e-mail associado à sua conta Heroku.
-        * **Nome:** `SCRAPINGBEE_API_KEY`
-        * **Valor:** Cole a chave de API do ScrapingBee que você copiou.
     * Clique em **Add secret** para cada um.
-9.  **Faça um push para a branch `develop`:**
-    Após configurar os secrets e ter o seu workflow do GitHub Actions atualizado para o Heroku, qualquer commit na branch `develop` irá acionar o pipeline do GitHub Actions, que fará o deploy automático do projeto na plataforma Heroku.
+8.  **Faça um push para a branch `main`:**
+    Após configurar os secrets e ter o seu workflow do GitHub Actions atualizado para o Heroku, qualquer commit na branch `main` irá acionar o pipeline do GitHub Actions, que fará o deploy automático do projeto na plataforma Heroku.
 
 ---
 

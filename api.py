@@ -494,6 +494,5 @@ def hello_world():
 def index():
     return 'API está funcionando!'
 
-
 if __name__ == '__main__':
     app.run(debug=True)

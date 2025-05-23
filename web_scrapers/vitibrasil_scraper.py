@@ -16,11 +16,7 @@ class ScrapingError(Exception):
 
 class VitibrasilScraper:
 
-    # Configuracao para os Mocks
-    useMock = False
     useLocal = False
-    url_base_for_mocks = "C:/FIAP/Tech Challenge/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
-    # url_base_for_mocks = "file:///Users/mac/Desktop/dev/fiap-pos-tech-ml-tech-challenge-api/web_scrapers/mocks/"
 
     CHROMEDRIVER_PATH_LOCAL = "/Users/mac/Downloads/chromedriver-mac-x64/chromedriver" 
     CHROME_BINARY_PATH_LOCAL = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" 
@@ -45,39 +41,21 @@ class VitibrasilScraper:
 
         # URLs ScrapingBee
         "url_producao_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fopcao%3Dopt_02%26ano=",
-        "url_processamento_viniferas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_03%26ano=",
-        "url_americanas_hibridas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_02%26opcao%3Dopt_03%26ano=",
-        "url_uvas_de_mesa_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_03%26opcao%3Dopt_03%26ano=",
-        "url_sem_classificacao_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_04%26opcao%3Dopt_03%26ano=",
-        "url_comercializacao_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fopcao%3Dopt_04%26ano=",
-        "url_importacao_vinhos_de_mesa_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_05%26ano=",
-        "url_importacao_espumantes_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_02%26opcao%3Dopt_05%26ano=",
-        "url_importacao_uvas_frescas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_03%26opcao%3Dopt_05%26ano=",
-        "url_importacao_uvas_passas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_04%26opcao%3Dopt_05%26ano=",
-        "url_importacao_suco_de_uva_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_05%26opcao%3Dopt_05%26ano=",
-        "url_exportacao_vinhos_de_mesa_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_06%26ano=",
-        "url_exportacao_espumantes_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_02%26opcao%3Dopt_06%26ano=",
-        "url_exportacao_uvas_frescas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_03%26opcao%3Dopt_06%26ano=",
-        "url_exportacao_suco_de_uva_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_04%26opcao%3Dopt_06%26ano=",
-
-        # URLs Mock
-        "url_producao_mock": f"{url_base_for_mocks}producao.html?ano=",
-        "url_processamento_viniferas_mock": f"{url_base_for_mocks}processamento_viniferas.html?ano=",
-        "url_americanas_hibridas_mock": f"{url_base_for_mocks}processamento_americanas_hibridas.html?ano=",
-        "url_uvas_de_mesa_mock": f"{url_base_for_mocks}processamento_uvas_de_mesa.html?ano=",
-        "url_sem_classificacao_mock": f"{url_base_for_mocks}processamento_sem_classificacao.html?ano=",
-        "url_comercializacao_mock": f"{url_base_for_mocks}comercializacao.html?ano=",
-        "url_importacao_vinhos_de_mesa_mock": f"{url_base_for_mocks}importacao_vinhos_de_mesa.html?ano=",
-        "url_importacao_espumantes_mock": f"{url_base_for_mocks}importacao_espumantes.html?ano=",
-        "url_importacao_uvas_frescas_mock": f"{url_base_for_mocks}importacao_uvas_frescas.html?ano=",
-        "url_importacao_uvas_passas_mock": f"{url_base_for_mocks}importacao_uvas_passas.html?ano=",
-        "url_importacao_suco_de_uva_mock": f"{url_base_for_mocks}importacao_suco_de_uva.html?ano=",
-        "url_exportacao_vinhos_de_mesa_mock": f"{url_base_for_mocks}exportacao_vinhos_de_mesa.html?ano=",
-        "url_exportacao_espumantes_mock": f"{url_base_for_mocks}exportacao_espumantes.html?ano=",
-        "url_exportacao_uvas_frescas_mock": f"{url_base_for_mocks}exportacao_uvas_frescas.html?ano=",
-        "url_exportacao_suco_de_uva_mock": f"{url_base_for_mocks}exportacao_suco_de_uva.html?ano="
+        "url_processamento_viniferas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_03%26ano=",
+        "url_americanas_hibridas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_02%26opcao%3Dopt_03%26ano=",
+        "url_uvas_de_mesa_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_03%26opcao%3Dopt_03%26ano=",
+        "url_sem_classificacao_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_04%26opcao%3Dopt_03%26ano=",
+        "url_comercializacao_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fopcao%3Dopt_04%26ano=",
+        "url_importacao_vinhos_de_mesa_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_05%26ano=",
+        "url_importacao_espumantes_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_02%26opcao%3Dopt_05%26ano=",
+        "url_importacao_uvas_frescas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_03%26opcao%3Dopt_05%26ano=",
+        "url_importacao_uvas_passas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_04%26opcao%3Dopt_05%26ano=",
+        "url_importacao_suco_de_uva_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_05%26opcao%3Dopt_05%26ano=",
+        "url_exportacao_vinhos_de_mesa_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_01%26opcao%3Dopt_06%26ano=",
+        "url_exportacao_espumantes_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_02%26opcao%3Dopt_06%26ano=",
+        "url_exportacao_uvas_frescas_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_03%26opcao%3Dopt_06%26ano=",
+        "url_exportacao_suco_de_uva_scrapingbee": f"https://app.scrapingbee.com/api/v1?api_key={os.environ.get('SCRAPINGBEE_API_KEY')}&render_js=false&url=http%3A%2F%2Fvitibrasil.cnpuv.embrapa.br%2Findex.php%3Fsubopcao%3Dsubopt_04%26opcao%3Dopt_06%26ano="
     }
-
 
     def __init__(self):
         chrome_options = Options()
@@ -124,7 +102,6 @@ class VitibrasilScraper:
         except WebDriverException as e:
             raise ScrapingError(f"Falha ao inicializar o WebDriver: {str(e)}. Verifique se o ChromeDriver e o Chrome estão instalados e compatíveis.")
 
-
     def __del__(self):
         # Garante que o driver seja fechado ao final para liberar recursos
         if hasattr(self, 'driver') and self.driver: 
@@ -135,8 +112,7 @@ class VitibrasilScraper:
 
     def get_url(self, base_url_name, ano='2023'):
         chosen_url = (
-            self.urls[f"{base_url_name}_mock"] if self.useMock
-            else self.urls[base_url_name] if self.useLocal
+            self.urls[base_url_name] if self.useLocal
             else self.urls[f"{base_url_name}_scrapingbee"]
         )
         
@@ -208,12 +184,11 @@ class VitibrasilScraper:
                 print(f"Tentativa {attempt + 1} de {max_retries} para URL: {url}")
                 self.driver.get(url)
                 
-                # Espera explícita pela tabela com classe 'tb_dados'
-                # Aumentei o tempo de espera máximo para 15 segundos
+                # Espera pela tabela com classe 'tb_dados'
                 WebDriverWait(self.driver, 15).until(
                     EC.presence_of_element_located((By.CLASS_NAME, "tb_dados"))
                 )
-                time.sleep(1) # Pequena pausa extra para renderização final, se necessário
+                time.sleep(1) 
 
                 html = self.driver.page_source
                 soup = BeautifulSoup(html, 'html.parser')
@@ -248,16 +223,11 @@ class VitibrasilScraper:
                                 item_principal['subitem'].append(subitem)
 
                     if not dados and categoria != 'sem_classificacao':
-                        print(f"A tabela com classe 'tb_dados' para a categoria '{categoria}' foi encontrada, mas não contém dados significativos.")
-                        # Não levantar ScrapingError aqui se houver dados, mas o site pode ter retornado vazio
-                        # Se realmente não houver dados, o retorno abaixo lidará com isso.
+                        print(f"A tabela com classe 'tb_dados' para a categoria '{categoria}' foi encontrada, mas não contém dados significativos.")                        
                     
                     return {"categoria": categoria, "dados": dados}
                 else:
-                    # Esta parte 'else' não deve ser alcançada se o WebDriverWait for bem-sucedido
-                    # Se o WebDriverWait falhar, ele já levantará um TimeoutException
                     print(f"ERRO: Tabela com classe 'tb_dados' não encontrada na URL {url} na tentativa {attempt + 1} (após WebDriverWait).")
-                    # Para depuração: levantar um erro para cair no except e capturar o HTML
                     raise ScrapingError(f"Tabela 'tb_dados' não encontrada após espera na URL: {url}") 
             
             except TimeoutException as e: 
@@ -270,7 +240,7 @@ class VitibrasilScraper:
                     print(f"Falha ao capturar HTML no erro de Timeout: {capture_e}")
 
                 time.sleep(retry_delay)
-                if attempt == max_retries - 1: # Se for a última tentativa, re-raise o erro para o chamador
+                if attempt == max_retries - 1: 
                     raise ScrapingError(f"Tempo limite excedido após {max_retries} tentativas na URL: {url}") from e
             
             except Exception as e:
@@ -283,10 +253,9 @@ class VitibrasilScraper:
                     print(f"Falha ao capturar HTML no erro inesperado: {capture_e}")
                 
                 time.sleep(retry_delay)
-                if attempt == max_retries - 1: # Se for a última tentativa, re-raise o erro para o chamador
+                if attempt == max_retries - 1: 
                     raise ScrapingError(f"Erro inesperado após {max_retries} tentativas na URL: {url}") from e
 
-        # Este raise só será atingido se todas as tentativas falharem sem lançar uma exceção específica tratada acima
         raise ScrapingError(f"Falha ao encontrar a tabela com classe 'tb_dados' após {max_retries} tentativas na URL: {url} (verifique logs para mais detalhes).")
 
 
@@ -296,7 +265,7 @@ class VitibrasilScraper:
                 print(f"Tentativa {attempt + 1} de {max_retries} para URL simples: {url}")
                 self.driver.get(url)
                 
-                # Espera explícita pela tabela com classe 'tb_dados'
+                # Espera pela tabela com classe 'tb_dados'
                 WebDriverWait(self.driver, 15).until(
                     EC.presence_of_element_located((By.CLASS_NAME, "tb_dados"))
                 )
@@ -338,26 +307,26 @@ class VitibrasilScraper:
 
             except TimeoutException as e: 
                 print(f"[Tentativa {attempt + 1}] Tempo limite excedido ao esperar pela tabela simples: {e}")
-                # --- Bloco de depuração no erro ---
+                
                 try:
                     page_html_on_error = self.driver.page_source
                     print(f"HTML da página no momento do Timeout (primeiras 1000 chars):\n{page_html_on_error[:1000]}...")
                 except WebDriverException as capture_e:
                     print(f"Falha ao capturar HTML no erro de Timeout: {capture_e}")
-                # --- Fim do bloco de depuração ---
+                
                 time.sleep(retry_delay)
                 if attempt == max_retries - 1:
                     raise ScrapingError(f"Tempo limite excedido após {max_retries} tentativas na URL simples: {url}") from e
             
             except Exception as e:
                 print(f"[Tentativa {attempt + 1}] Erro inesperado: {e}")
-                # --- Bloco de depuração no erro ---
+                
                 try:
                     page_html_on_error = self.driver.page_source
                     print(f"HTML da página no momento do erro inesperado (primeiras 1000 chars):\n{page_html_on_error[:1000]}...")
                 except WebDriverException as capture_e:
                     print(f"Falha ao capturar HTML no erro inesperado: {capture_e}")
-                # --- Fim do bloco de depuração ---
+                
                 time.sleep(retry_delay)
                 if attempt == max_retries - 1:
                     raise ScrapingError(f"Erro inesperado após {max_retries} tentativas na URL simples: {url}") from e

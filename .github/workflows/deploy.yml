@@ -22,12 +22,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
-      - name: Configurar Node.js # <-- NOVO PASSO
+      - name: Configurar Node.js 
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Use uma versão LTS do Node.js
+          node-version: '20'
           
-      - name: Instalar Heroku CLI # <-- NOVO PASSO
+      - name: Instalar Heroku CLI 
         run: npm install -g heroku
         
       - name: Deploy para Heroku

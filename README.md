@@ -160,8 +160,8 @@ Documentação em Swagger:
 # Localhost
 http://127.0.0.1:5000/apidocs
 
-# Exemplo de como ficaria no Heroku
-https://pos-tech-ml-tech-challenge-api-47e455659f67.herokuapp.com/apidocs/
+# Exemplo de como ficaria no Heroku, precisa necessariamente ser http para que o web scraping funcione
+http://pos-tech-ml-tech-challenge-api-47e455659f67.herokuapp.com/apidocs/
 ```
 
 

@@ -124,7 +124,7 @@ def producao(ano):
         required: true
         schema:
           type: string
-        description: Ano de referência para os dados de produção (ex: "2023").
+        description: Ano de referência para os dados de produção (exemplo "2023").
     security:
       - Bearer: []
     responses:
@@ -190,7 +190,7 @@ def processamento(categoria, ano):
         required: true
         schema:
           type: string
-        description: Ano de referência para os dados de processamento (ex: "2023").
+        description: Ano de referência para os dados de processamento (exemplo "2023").
     security:
       - Bearer: []
     responses:
@@ -269,7 +269,7 @@ def comercializacao(ano):
         required: true
         schema:
           type: string
-        description: Ano de referência para os dados de comercialização (ex: "2023").
+        description: Ano de referência para os dados de comercialização (exemplo "2023").
     security:
       - Bearer: []
     responses:
@@ -335,7 +335,7 @@ def importacao(categoria, ano):
         required: true
         schema:
           type: string
-        description: Ano de referência para os dados de importação (ex: "2023").
+        description: Ano de referência para os dados de importação (exemplo "2023").
     security:
       - Bearer: []
     responses:
@@ -422,7 +422,7 @@ def exportacao(categoria, ano):
         required: true
         schema:
           type: string
-        description: Ano de referência para os dados de exportação (ex: "2023").
+        description: Ano de referência para os dados de exportação (exemplo "2023").
     security:
       - Bearer: []
     responses:

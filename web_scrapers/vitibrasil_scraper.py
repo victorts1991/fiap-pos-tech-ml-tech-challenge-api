@@ -185,10 +185,9 @@ class VitibrasilScraper:
                 self.driver.get(url)
                 
                 # Espera pela tabela com classe 'tb_dados'
-                WebDriverWait(self.driver, 15).until(
+                WebDriverWait(self.driver, 20).until(
                     EC.presence_of_element_located((By.CLASS_NAME, "tb_dados"))
                 )
-                time.sleep(1) 
 
                 html = self.driver.page_source
                 soup = BeautifulSoup(html, 'html.parser')
@@ -266,10 +265,9 @@ class VitibrasilScraper:
                 self.driver.get(url)
                 
                 # Espera pela tabela com classe 'tb_dados'
-                WebDriverWait(self.driver, 15).until(
+                WebDriverWait(self.driver, 20).until(
                     EC.presence_of_element_located((By.CLASS_NAME, "tb_dados"))
                 )
-                time.sleep(1)
 
                 html = self.driver.page_source
                 soup = BeautifulSoup(html, 'html.parser')

@@ -2,14 +2,9 @@ import datetime
 import json
 from flask import Flask, jsonify, request
 from flasgger import Swagger
-import requests
-from bs4 import BeautifulSoup
 import jwt
 from functools import wraps
-from web_scrapers.vitibrasil_scraper import VitibrasilScraper, ScrapingError
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-import pandas as pd
+from web_scrapers.vitibrasil_scraper_bs4 import VitibrasilScraper, ScrapingError
 import time
 import re  
 

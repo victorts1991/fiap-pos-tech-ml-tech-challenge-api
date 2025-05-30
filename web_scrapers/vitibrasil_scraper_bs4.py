@@ -49,11 +49,9 @@ class VitibrasilScraper:
     }
 
     def __init__(self):
-        # Nenhuma inicialização de WebDriver necessária para requests
         pass
 
     def __del__(self):
-        # Nenhuma ação de fechamento de driver necessária
         pass
 
     def get_url(self, base_url_name, ano='2023'):
@@ -72,8 +70,8 @@ class VitibrasilScraper:
         for attempt in range(max_retries):
             try:
                 print(f"Tentativa {attempt + 1} de {max_retries} para URL: {url}")
-                response = requests.get(url, headers=headers, timeout=15) # Increased timeout
-                response.raise_for_status()  # Raise an HTTPError for bad responses (4xx or 5xx)
+                response = requests.get(url, headers=headers, timeout=15) 
+                response.raise_for_status()  
                 return response.content
             except requests.exceptions.Timeout as e:
                 print(f"Tempo limite excedido ao requisitar {url} na tentativa {attempt + 1}: {e}")

@@ -4,7 +4,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, WebDriverException # Importar WebDriverException também para erros gerais do driver
+from selenium.common.exceptions import TimeoutException, WebDriverException 
 from bs4 import BeautifulSoup
 import re
 import time
@@ -73,12 +73,11 @@ class VitibrasilScraper:
         is_heroku = os.environ.get('DYNO') is not None 
 
         if is_heroku:
-            # **** CAMINHOS EXATOS ENCONTRADOS NO HEROKU ****
+            
             CHROME_BINARY_PATH = "/app/.chrome-for-testing/chrome-linux64/chrome"
             CHROMEDRIVER_PATH = "/app/.chrome-for-testing/chromedriver-linux64/chromedriver"
             print("Rodando no Heroku: Usando caminhos de buildpack.")
         else:
-            # **** CAMINHOS PARA AMBIENTE LOCAL ****
             
             CHROMEDRIVER_PATH = self.CHROMEDRIVER_PATH_LOCAL 
             CHROME_BINARY_PATH = self.CHROME_BINARY_PATH_LOCAL

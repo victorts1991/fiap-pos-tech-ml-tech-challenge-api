@@ -1,10 +1,4 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, WebDriverException # Importar WebDriverException também para erros gerais do driver
+import requests
 from bs4 import BeautifulSoup
 import re
 import time
@@ -17,9 +11,6 @@ class ScrapingError(Exception):
 class VitibrasilScraper:
 
     useLocal = False
-
-    CHROMEDRIVER_PATH_LOCAL = "/Users/mac/Downloads/chromedriver-mac-x64/chromedriver" 
-    CHROME_BINARY_PATH_LOCAL = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" 
 
     urls = {
         # URLs originais
@@ -58,57 +49,12 @@ class VitibrasilScraper:
     }
 
     def __init__(self):
-        chrome_options = Options()
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--disable-gpu')
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--verbose')
-        chrome_options.add_argument('--log-path=/tmp/chromedriver.log')
-        chrome_options.add_argument('--ignore-certificate-errors')
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument('--window-size=1920x1080')
-        chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36')
-
-        # --- Lógica para alternar entre ambiente local e Heroku ---
-        is_heroku = os.environ.get('DYNO') is not None 
-
-        if is_heroku:
-            # **** CAMINHOS EXATOS ENCONTRADOS NO HEROKU ****
-            CHROME_BINARY_PATH = "/app/.chrome-for-testing/chrome-linux64/chrome"
-            CHROMEDRIVER_PATH = "/app/.chrome-for-testing/chromedriver-linux64/chromedriver"
-            print("Rodando no Heroku: Usando caminhos de buildpack.")
-        else:
-            # **** CAMINHOS PARA AMBIENTE LOCAL ****
-            
-            CHROMEDRIVER_PATH = self.CHROMEDRIVER_PATH_LOCAL 
-            CHROME_BINARY_PATH = self.CHROME_BINARY_PATH_LOCAL
-
-            print(f"Rodando localmente: Usando chromedriver de {CHROMEDRIVER_PATH}")
-            # Verifica se os binários existem e são acessíveis (para depuração local)
-            if not os.path.exists(CHROME_BINARY_PATH):
-                print(f"AVISO: Chrome binário não encontrado localmente em: {CHROME_BINARY_PATH}. Isso pode causar problemas se você não tiver o Chrome instalado ou o caminho estiver incorreto.")
-            if not os.path.exists(CHROMEDRIVER_PATH):
-                raise ScrapingError(f"ChromeDriver não encontrado localmente em: {CHROMEDRIVER_PATH}. Baixe a versão correta para o seu Chrome e coloque-o aqui.")
-
-        # Define o caminho do binário do Chrome para as opções do Selenium
-        chrome_options.binary_location = CHROME_BINARY_PATH
-
-        if os.path.exists(CHROMEDRIVER_PATH) and not os.access(CHROMEDRIVER_PATH, os.X_OK):
-             os.chmod(CHROMEDRIVER_PATH, 0o755)
-
-        try:
-            service = Service(executable_path=CHROMEDRIVER_PATH)
-            self.driver = webdriver.Chrome(service=service, options=chrome_options)
-        except WebDriverException as e:
-            raise ScrapingError(f"Falha ao inicializar o WebDriver: {str(e)}. Verifique se o ChromeDriver e o Chrome estão instalados e compatíveis.")
+        # Nenhuma inicialização de WebDriver necessária para requests
+        pass
 
     def __del__(self):
-        # Garante que o driver seja fechado ao final para liberar recursos
-        if hasattr(self, 'driver') and self.driver: 
-            try:
-                self.driver.quit()
-            except WebDriverException as e:
-                print(f"Aviso: Erro ao fechar o WebDriver: {e}")
+        # Nenhuma ação de fechamento de driver necessária
+        pass
 
     def get_url(self, base_url_name, ano='2023'):
         chosen_url = (
@@ -117,6 +63,29 @@ class VitibrasilScraper:
         )
         
         return f"{chosen_url}{ano}"
+
+    def _fetch_page_content(self, url, max_retries, retry_delay):
+        """Fetches the HTML content of a given URL using requests."""
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36'
+        }
+        for attempt in range(max_retries):
+            try:
+                print(f"Tentativa {attempt + 1} de {max_retries} para URL: {url}")
+                response = requests.get(url, headers=headers, timeout=15) # Increased timeout
+                response.raise_for_status()  # Raise an HTTPError for bad responses (4xx or 5xx)
+                return response.content
+            except requests.exceptions.Timeout as e:
+                print(f"Tempo limite excedido ao requisitar {url} na tentativa {attempt + 1}: {e}")
+                time.sleep(retry_delay)
+                if attempt == max_retries - 1:
+                    raise ScrapingError(f"Tempo limite excedido após {max_retries} tentativas na URL: {url}") from e
+            except requests.exceptions.RequestException as e:
+                print(f"Erro ao requisitar {url} na tentativa {attempt + 1}: {e}")
+                time.sleep(retry_delay)
+                if attempt == max_retries - 1:
+                    raise ScrapingError(f"Erro de requisição após {max_retries} tentativas na URL: {url}") from e
+        return None # Should not be reached if an exception is always raised on last attempt
 
     def scrape_producao(self, max_retries=3, retry_delay=5, ano="2023"):
         url = self.get_url("url_producao", ano)
@@ -179,154 +148,81 @@ class VitibrasilScraper:
         return self._scrape_tabela_simples(url, 'exportacao_suco_de_uva', max_retries, retry_delay, ano)
 
     def _scrape_tabela(self, url, categoria, max_retries=3, retry_delay=5, ano='2023'):
-        for attempt in range(max_retries):
-            try:
-                print(f"Tentativa {attempt + 1} de {max_retries} para URL: {url}")
-                self.driver.get(url)
-                
-                # Espera pela tabela com classe 'tb_dados'
-                WebDriverWait(self.driver, 20).until(
-                    EC.presence_of_element_located((By.CLASS_NAME, "tb_dados"))
-                )
+        html = self._fetch_page_content(url, max_retries, retry_delay)
+        if not html:
+            raise ScrapingError(f"Não foi possível obter o conteúdo da página para {url}")
 
-                html = self.driver.page_source
-                soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, 'html.parser')
 
-                tabela = soup.find("table", class_="tb_dados")
-                
-                if tabela:
-                    dados = []
-                    thead = tabela.find("thead")
-                    tbody = tabela.find("tbody")
-                    cabecalho_tabela = [th.get_text(strip=True) for th in thead.find_all("th")] if thead else []
-                    linhas = tbody.find_all("tr") if tbody else []
-                    item_principal = None
+        tabela = soup.find("table", class_="tb_dados")
+        
+        if tabela:
+            dados = []
+            thead = tabela.find("thead")
+            tbody = tabela.find("tbody")
+            cabecalho_tabela = [th.get_text(strip=True) for th in thead.find_all("th")] if thead else []
+            linhas = tbody.find_all("tr") if tbody else []
+            item_principal = None
 
-                    for linha in linhas:
-                        celulas = linha.find_all("td")
-                        if len(celulas) == len(cabecalho_tabela):
-                            primeira_celula = celulas[0]
-                            classes_primeira_celula = primeira_celula.get('class', [])
+            for linha in linhas:
+                celulas = linha.find_all("td")
+                if len(celulas) == len(cabecalho_tabela):
+                    primeira_celula = celulas[0]
+                    classes_primeira_celula = primeira_celula.get('class', [])
 
-                            if 'tb_item' in classes_primeira_celula:
-                                item_principal = {"ano": ano, "categoria": categoria}
-                                for i, coluna in enumerate(cabecalho_tabela):
-                                    item_principal[coluna.lower().replace(' ', '_').replace('(', '').replace(')', '')] = celulas[i].get_text(strip=True)
-                                item_principal['subitem'] = []
-                                dados.append(item_principal)
+                    if 'tb_item' in classes_primeira_celula:
+                        item_principal = {"ano": ano, "categoria": categoria}
+                        for i, coluna in enumerate(cabecalho_tabela):
+                            item_principal[coluna.lower().replace(' ', '_').replace('(', '').replace(')', '')] = celulas[i].get_text(strip=True)
+                        item_principal['subitem'] = []
+                        dados.append(item_principal)
 
-                            elif 'tb_subitem' in classes_primeira_celula and item_principal is not None:
-                                subitem = {}
-                                for i, coluna in enumerate(cabecalho_tabela):
-                                    subitem[coluna.lower().replace(' ', '_').replace('(', '').replace(')', '')] = celulas[i].get_text(strip=True)
-                                item_principal['subitem'].append(subitem)
+                    elif 'tb_subitem' in classes_primeira_celula and item_principal is not None:
+                        subitem = {}
+                        for i, coluna in enumerate(cabecalho_tabela):
+                            subitem[coluna.lower().replace(' ', '_').replace('(', '').replace(')', '')] = celulas[i].get_text(strip=True)
+                        item_principal['subitem'].append(subitem)
 
-                    if not dados and categoria != 'sem_classificacao':
-                        print(f"A tabela com classe 'tb_dados' para a categoria '{categoria}' foi encontrada, mas não contém dados significativos.")                        
-                    
-                    return {"categoria": categoria, "dados": dados}
-                else:
-                    print(f"ERRO: Tabela com classe 'tb_dados' não encontrada na URL {url} na tentativa {attempt + 1} (após WebDriverWait).")
-                    raise ScrapingError(f"Tabela 'tb_dados' não encontrada após espera na URL: {url}") 
+            if not dados and categoria != 'sem_classificacao':
+                print(f"A tabela com classe 'tb_dados' para a categoria '{categoria}' foi encontrada, mas não contém dados significativos.")                        
             
-            except TimeoutException as e: 
-
-                print(f"Tempo limite excedido ao esperar pela tabela em {url} na tentativa {attempt + 1}: {e}")
-                try:
-                    page_html_on_error = self.driver.page_source
-                    print(f"HTML da página no momento do Timeout (primeiras 1000 chars):\n{page_html_on_error[:1000]}...")
-                except WebDriverException as capture_e:
-                    print(f"Falha ao capturar HTML no erro de Timeout: {capture_e}")
-
-                time.sleep(retry_delay)
-                if attempt == max_retries - 1: 
-                    raise ScrapingError(f"Tempo limite excedido após {max_retries} tentativas na URL: {url}") from e
-            
-            except Exception as e:
-                print(f"Erro inesperado ao processar URL {url} na tentativa {attempt + 1}: {e}")
-                
-                try:
-                    page_html_on_error = self.driver.page_source
-                    print(f"HTML da página no momento do erro inesperado (primeiras 1000 chars):\n{page_html_on_error[:1000]}...")
-                except WebDriverException as capture_e:
-                    print(f"Falha ao capturar HTML no erro inesperado: {capture_e}")
-                
-                time.sleep(retry_delay)
-                if attempt == max_retries - 1: 
-                    raise ScrapingError(f"Erro inesperado após {max_retries} tentativas na URL: {url}") from e
-
-        raise ScrapingError(f"Falha ao encontrar a tabela com classe 'tb_dados' após {max_retries} tentativas na URL: {url} (verifique logs para mais detalhes).")
-
+            return {"categoria": categoria, "dados": dados}
+        else:
+            raise ScrapingError(f"Tabela com classe 'tb_dados' não encontrada na URL: {url}") 
 
     def _scrape_tabela_simples(self, url, categoria, max_retries=3, retry_delay=5, ano='2023'):
-        for attempt in range(max_retries):
-            try:
-                print(f"Tentativa {attempt + 1} de {max_retries} para URL simples: {url}")
-                self.driver.get(url)
-                
-                # Espera pela tabela com classe 'tb_dados'
-                WebDriverWait(self.driver, 20).until(
-                    EC.presence_of_element_located((By.CLASS_NAME, "tb_dados"))
-                )
+        html = self._fetch_page_content(url, max_retries, retry_delay)
+        if not html:
+            raise ScrapingError(f"Não foi possível obter o conteúdo da página para {url}")
 
-                html = self.driver.page_source
-                soup = BeautifulSoup(html, 'html.parser')
+        soup = BeautifulSoup(html, 'html.parser')
 
-                tabela = soup.find("table", class_="tb_dados")
-                if not tabela:
-                    print(f"ERRO: Tabela com classe 'tb_dados' não encontrada na URL simples {url} na tentativa {attempt + 1} (após WebDriverWait).")
-                    raise ScrapingError(f"Tabela 'tb_dados' não encontrada após espera na URL simples: {url}")
+        tabela = soup.find("table", class_="tb_dados")
+        if not tabela:
+            raise ScrapingError(f"Tabela com classe 'tb_dados' não encontrada na URL simples: {url}")
 
-                linhas = tabela.find_all("tr")
-                dados = []
-                item_principal = {
-                    "ano": ano,
-                    "categoria": categoria,
-                    "subitem": []
-                }
+        linhas = tabela.find_all("tr")
+        dados = []
+        item_principal = {
+            "ano": ano,
+            "categoria": categoria,
+            "subitem": []
+        }
 
-                for linha in linhas[1:]:
-                    colunas = linha.find_all("td")
-                    if len(colunas) == 3:
-                        pais = colunas[0].get_text(strip=True)
-                        quantidade = colunas[1].get_text(strip=True)
-                        valor = colunas[2].get_text(strip=True)
+        for linha in linhas[1:]:
+            colunas = linha.find_all("td")
+            if len(colunas) == 3:
+                pais = colunas[0].get_text(strip=True)
+                quantidade = colunas[1].get_text(strip=True)
+                valor = colunas[2].get_text(strip=True)
 
-                        item_principal['subitem'].append({
-                            "pais": pais,
-                            "quantidade_kg": quantidade,
-                            "valor_usd": valor
-                        })
+                item_principal['subitem'].append({
+                    "pais": pais,
+                    "quantidade_kg": quantidade,
+                    "valor_usd": valor
+                })
 
-                if item_principal['subitem']:
-                    dados.append(item_principal)
+        if item_principal['subitem']:
+            dados.append(item_principal)
 
-                return {"categoria": categoria, "dados": dados}
-
-            except TimeoutException as e: 
-                print(f"[Tentativa {attempt + 1}] Tempo limite excedido ao esperar pela tabela simples: {e}")
-                
-                try:
-                    page_html_on_error = self.driver.page_source
-                    print(f"HTML da página no momento do Timeout (primeiras 1000 chars):\n{page_html_on_error[:1000]}...")
-                except WebDriverException as capture_e:
-                    print(f"Falha ao capturar HTML no erro de Timeout: {capture_e}")
-                
-                time.sleep(retry_delay)
-                if attempt == max_retries - 1:
-                    raise ScrapingError(f"Tempo limite excedido após {max_retries} tentativas na URL simples: {url}") from e
-            
-            except Exception as e:
-                print(f"[Tentativa {attempt + 1}] Erro inesperado: {e}")
-                
-                try:
-                    page_html_on_error = self.driver.page_source
-                    print(f"HTML da página no momento do erro inesperado (primeiras 1000 chars):\n{page_html_on_error[:1000]}...")
-                except WebDriverException as capture_e:
-                    print(f"Falha ao capturar HTML no erro inesperado: {capture_e}")
-                
-                time.sleep(retry_delay)
-                if attempt == max_retries - 1:
-                    raise ScrapingError(f"Erro inesperado após {max_retries} tentativas na URL simples: {url}") from e
-
-        raise ScrapingError(f"Falha ao processar tabela simples da categoria {categoria} após {max_retries} tentativas. (verifique logs para mais detalhes).")
+        return {"categoria": categoria, "dados": dados}

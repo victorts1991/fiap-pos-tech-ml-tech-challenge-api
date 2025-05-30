@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 import jwt
 from functools import wraps
-from web_scrapers.vitibrasil_scraper2 import VitibrasilScraper, ScrapingError
+from web_scrapers.vitibrasil_scraper import VitibrasilScraper, ScrapingError
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import pandas as pd
